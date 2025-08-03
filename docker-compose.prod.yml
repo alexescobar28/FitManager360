@@ -1,0 +1,283 @@
+version: '3.8'
+
+services:
+  # MongoDB Databases
+  mongodb-auth:
+    image: mongo:7.0
+    container_name: fitmanager_mongodb_auth_prod
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: fitmanager_auth
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_auth_data:/data/db
+    networks:
+      - fitmanager_network
+
+  mongodb-routine:
+    image: mongo:7.0
+    container_name: fitmanager_mongodb_routine_prod
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: fitmanager_routine
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_routine_data:/data/db
+    networks:
+      - fitmanager_network
+
+  mongodb-chat:
+    image: mongo:7.0
+    container_name: fitmanager_mongodb_chat_prod
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: fitmanager_chat
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongodb_chat_data:/data/db
+    networks:
+      - fitmanager_network
+
+  mongodb-stats:
+    image: mongo:7.0
+    container_name: fitmanager_mongodb_stats_prod
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: fitmanager_stats
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongodb_stats_data:/data/db
+    networks:
+      - fitmanager_network
+
+  # Authentication Service
+  auth-service:
+    image: ghcr.io/${GITHUB_REPOSITORY}/auth-service:latest
+    container_name: fitmanager_auth_service_prod
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb-auth:27017/fitmanager_auth?authSource=admin
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=24h
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - EMAIL_FROM=${EMAIL_FROM}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - SERVICE_NAME=auth-service
+    depends_on:
+      - mongodb-auth
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fitmanager_network
+
+  # Routine Service
+  routine-service:
+    image: ghcr.io/${GITHUB_REPOSITORY}/routine-service:latest
+    container_name: fitmanager_routine_service_prod
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb-routine:27017/fitmanager_routine?authSource=admin
+      - JWT_SECRET=${JWT_SECRET}
+      - SERVICE_NAME=routine-service
+    depends_on:
+      - mongodb-routine
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fitmanager_network
+
+  # Chat Service
+  chat-service:
+    image: ghcr.io/${GITHUB_REPOSITORY}/chat-service:latest
+    container_name: fitmanager_chat_service_prod
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb-chat:27017/fitmanager_chat?authSource=admin
+      - JWT_SECRET=${JWT_SECRET}
+      - SERVICE_NAME=chat-service
+    depends_on:
+      - mongodb-chat
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fitmanager_network
+
+  # Stats Service
+  stats-service:
+    image: ghcr.io/${GITHUB_REPOSITORY}/stats-service:latest
+    container_name: fitmanager_stats_service_prod
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=production
+      - PORT=3004
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb-stats:27017/fitmanager_stats?authSource=admin
+      - JWT_SECRET=${JWT_SECRET}
+      - SERVICE_NAME=stats-service
+    depends_on:
+      - mongodb-stats
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fitmanager_network
+
+  # API Gateway
+  api-gateway:
+    image: ghcr.io/${GITHUB_REPOSITORY}/api-gateway:latest
+    container_name: fitmanager_api_gateway_prod
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - ROUTINE_SERVICE_URL=http://routine-service:3002
+      - CHAT_SERVICE_URL=http://chat-service:3003
+      - STATS_SERVICE_URL=http://stats-service:3004
+      - SERVICE_NAME=api-gateway
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      routine-service:
+        condition: service_healthy
+      chat-service:
+        condition: service_healthy
+      stats-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fitmanager_network
+
+  # Frontend
+  frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY}/frontend:latest
+    container_name: fitmanager_frontend_prod
+    restart: unless-stopped
+    ports:
+      - "8081:3000"
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL}
+    depends_on:
+      - api-gateway
+    networks:
+      - fitmanager_network
+
+  # Nginx Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: fitmanager_nginx_prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - api-gateway
+    networks:
+      - fitmanager_network
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: fitmanager_prometheus_prod
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    networks:
+      - fitmanager_network
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: fitmanager_grafana_prod
+    restart: unless-stopped
+    ports:
+      - "3005:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards-json:/etc/grafana/dashboards:ro
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - fitmanager_network
+
+# Networks
+networks:
+  fitmanager_network:
+    driver: bridge
+
+# Volumes
+volumes:
+  mongodb_auth_data:
+  mongodb_routine_data:
+  mongodb_chat_data:
+  mongodb_stats_data:
+  prometheus_data:
+  grafana_data:

@@ -1,0 +1,281 @@
+version: '3.8'
+
+services:
+  # MongoDB Databases
+  mongodb-auth:
+    image: mongo:7.0
+    container_name: fitmanager_mongodb_auth
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: fitmanager_auth
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_auth_data:/data/db
+    networks:
+      - fitmanager_network
+
+  mongodb-routine:
+    image: mongo:7.0
+    container_name: fitmanager_mongodb_routine
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: fitmanager_routine
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_routine_data:/data/db
+    networks:
+      - fitmanager_network
+
+  mongodb-chat:
+    image: mongo:7.0
+    container_name: fitmanager_mongodb_chat
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: fitmanager_chat
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongodb_chat_data:/data/db
+    networks:
+      - fitmanager_network
+
+  mongodb-stats:
+    image: mongo:7.0
+    container_name: fitmanager_mongodb_stats
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: fitmanager_stats
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongodb_stats_data:/data/db
+    networks:
+      - fitmanager_network
+
+  # Authentication Service
+  auth-service:
+    build: ./backend/auth-service
+    container_name: fitmanager_auth_service
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MONGODB_URI=mongodb://admin:password123@mongodb-auth:27017/fitmanager_auth?authSource=admin
+      - JWT_SECRET=your-super-secret-jwt-key-here
+      - JWT_EXPIRES_IN=24h
+      - EMAIL_USER=fitmanager360@gmail.com
+      - EMAIL_PASS=myjhkxyrwkrqsbgt
+      - EMAIL_FROM=fitmanager360@gmail.com
+      - FRONTEND_URL=http://localhost:8081
+      - SERVICE_NAME=auth-service
+    depends_on:
+      - mongodb-auth
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fitmanager_network
+
+  # Routine Service
+  routine-service:
+    build: ./backend/routine-service
+    container_name: fitmanager_routine_service
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - MONGODB_URI=mongodb://admin:password123@mongodb-routine:27017/fitmanager_routine?authSource=admin
+      - JWT_SECRET=your-super-secret-jwt-key-here
+      - SERVICE_NAME=routine-service
+    depends_on:
+      - mongodb-routine
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fitmanager_network
+
+  # Chat Service
+  chat-service:
+    build: ./backend/chat-service
+    container_name: fitmanager_chat_service
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+      - MONGODB_URI=mongodb://admin:password123@mongodb-chat:27017/fitmanager_chat?authSource=admin
+      - JWT_SECRET=your-super-secret-jwt-key-here
+      - SERVICE_NAME=chat-service
+    depends_on:
+      - mongodb-chat
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fitmanager_network
+
+  # Stats Service
+  stats-service:
+    build: ./backend/stats-service
+    container_name: fitmanager_stats_service
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - PORT=3004
+      - MONGODB_URI=mongodb://admin:password123@mongodb-stats:27017/fitmanager_stats?authSource=admin
+      - JWT_SECRET=your-super-secret-jwt-key-here
+      - SERVICE_NAME=stats-service
+    depends_on:
+      - mongodb-stats
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fitmanager_network
+
+  # API Gateway
+  api-gateway:
+    build: ./backend/api-gateway
+    container_name: fitmanager_api_gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - ROUTINE_SERVICE_URL=http://routine-service:3002
+      - CHAT_SERVICE_URL=http://chat-service:3003
+      - STATS_SERVICE_URL=http://stats-service:3004
+      - SERVICE_NAME=api-gateway
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      routine-service:
+        condition: service_healthy
+      chat-service:
+        condition: service_healthy
+      stats-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fitmanager_network
+
+  # Frontend
+  frontend:
+    build: ./frontend
+    container_name: fitmanager_frontend
+    restart: unless-stopped
+    ports:
+      - "8081:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
+    depends_on:
+      - api-gateway
+    networks:
+      - fitmanager_network
+
+  # Nginx Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: fitmanager_nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - api-gateway
+    networks:
+      - fitmanager_network
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: fitmanager_prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    networks:
+      - fitmanager_network
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: fitmanager_grafana
+    restart: unless-stopped
+    ports:
+      - "3005:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards-json:/etc/grafana/dashboards:ro
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - fitmanager_network
+
+# Networks
+networks:
+  fitmanager_network:
+    driver: bridge
+
+# Volumes
+volumes:
+  mongodb_auth_data:
+  mongodb_routine_data:
+  mongodb_chat_data:
+  mongodb_stats_data:
+  prometheus_data:
+  grafana_data:

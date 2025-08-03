@@ -1,0 +1,27 @@
+{
+  "name": "fitmanager360",
+  "version": "1.0.0",
+  "description": "FitManager360 - Plataforma Integral para Gimnasios con Microservicios",
+  "main": "index.js",
+  "scripts": {
+    "install-all": "npm install && cd frontend && npm install && cd ../backend/api-gateway && npm install && cd ../auth-service && npm install && cd ../routine-service && npm install && cd ../chat-service && npm install && cd ../stats-service && npm install",
+    "dev": "docker-compose up --build",
+    "build": "cd frontend && npm run build",
+    "start": "docker-compose up",
+    "stop": "docker-compose down"
+  },
+  "keywords": [
+    "gymnasium",
+    "fitness",
+    "microservices",
+    "react",
+    "nodejs",
+    "mongodb",
+    "docker"
+  ],
+  "author": "FitManager360 Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

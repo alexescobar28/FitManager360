@@ -1,0 +1,72 @@
+groups:
+  - name: fitmanager360_alerts
+    rules:
+      # Service Down Alert
+      - alert: ServiceDown
+        expr: service_up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "FitManager360 service is down"
+          description: "Service {{ $labels.job }} has been down for more than 30 seconds."
+
+      # High Error Rate Alert
+      - alert: HighErrorRate
+        expr: rate(http_request_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Service {{ $labels.job }} has error rate above 10% for more than 2 minutes."
+
+      # High Response Time Alert
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_ms_bucket[5m])) > 1000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time detected"
+          description: "Service {{ $labels.job }} has 95th percentile response time above 1000ms for more than 2 minutes."
+
+      # High Request Rate Alert
+      - alert: HighRequestRate
+        expr: rate(http_requests_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "High request rate detected"
+          description: "Service {{ $labels.job }} is receiving more than 100 requests per second for more than 5 minutes."
+
+      # Memory Usage Alert
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / 1024 / 1024) > 512
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Service {{ $labels.job }} is using more than 512MB of memory for more than 5 minutes."
+
+      # CPU Usage Alert
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "Service {{ $labels.job }} is using more than 80% CPU for more than 5 minutes."
+
+      # Database Connection Alert
+      - alert: DatabaseConnectionIssue
+        expr: increase(http_request_errors_total{status_code="500"}[5m]) > 10
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Potential database connection issues"
+          description: "Service {{ $labels.job }} is receiving multiple 500 errors, possibly indicating database issues."
