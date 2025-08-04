@@ -286,6 +286,16 @@ const authenticateToken = (req, res, next) => {
 };
 // Routes
 
+// Root endpoint for health checks
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    service: 'auth-service',
+    message: 'FitManager360 Auth Service is running',
+    endpoints: ['/health', '/register', '/login', '/metrics'],
+  });
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', service: 'auth-service' });
@@ -300,7 +310,7 @@ app.post('/register', async (req, res) => {
     console.log('Registration request received:', {
       username: req.body.username,
       email: req.body.email,
-      hasProfile: !!req.body.profile
+      hasProfile: !!req.body.profile,
     });
 
     const { error } = registerSchema.validate(req.body);
@@ -354,9 +364,10 @@ app.post('/register', async (req, res) => {
   } catch (error) {
     console.error('Registration error details:', error);
     logger.error('Registration error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Internal server error',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      details:
+        process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
@@ -445,8 +456,10 @@ app.post('/forgot-password', async (req, res) => {
     await user.save();
 
     // Send password reset email
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:8080'}/reset-password?token=${resetToken}`;
-    
+    const resetUrl = `${
+      process.env.FRONTEND_URL || 'http://localhost:8080'
+    }/reset-password?token=${resetToken}`;
+
     const mailOptions = {
       from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
       to: email,
@@ -497,15 +510,17 @@ app.post('/forgot-password', async (req, res) => {
     try {
       await transporter.sendMail(mailOptions);
       logger.info(`Password reset email sent to: ${email}`);
-      
+
       res.json({
-        message: 'Si el correo electrónico existe, recibirás un enlace de recuperación en breve.',
+        message:
+          'Si el correo electrónico existe, recibirás un enlace de recuperación en breve.',
       });
     } catch (emailError) {
       logger.error('Error sending password reset email:', emailError);
       // Don't reveal email sending errors to client for security
       res.json({
-        message: 'Si el correo electrónico existe, recibirás un enlace de recuperación en breve.',
+        message:
+          'Si el correo electrónico existe, recibirás un enlace de recuperación en breve.',
       });
     }
   } catch (error) {
@@ -586,7 +601,7 @@ app.get('/verify-token', async (req, res) => {
 app.put('/profile', authenticateToken, async (req, res) => {
   try {
     logger.info(`Profile update request for user: ${req.user.id}`);
-    
+
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -597,7 +612,10 @@ app.put('/profile', authenticateToken, async (req, res) => {
     // Update profile fields
     if (req.body.profile) {
       user.profile = { ...user.profile, ...req.body.profile };
-      logger.info(`Updating profile for user ${req.user.id}:`, req.body.profile);
+      logger.info(
+        `Updating profile for user ${req.user.id}:`,
+        req.body.profile
+      );
     }
 
     await user.save();

@@ -1,0 +1,9 @@
+{
+  'build':
+    {
+      'buildCommand': 'npm install && npm run build',
+      'publishDirectory': 'build',
+      'env': { 'NODE_VERSION': '18' },
+    },
+  'deploy': { 'startCommand': 'npm start', 'healthCheckPath': '/' },
+}

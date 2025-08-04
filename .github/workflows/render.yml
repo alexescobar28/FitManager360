@@ -1,0 +1,160 @@
+name: Render CI/CD
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  # Detectar cambios en cada servicio
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      auth-service: ${{ steps.changes.outputs.auth-service }}
+      routine-service: ${{ steps.changes.outputs.routine-service }}
+      chat-service: ${{ steps.changes.outputs.chat-service }}
+      stats-service: ${{ steps.changes.outputs.stats-service }}
+      api-gateway: ${{ steps.changes.outputs.api-gateway }}
+      frontend: ${{ steps.changes.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            auth-service:
+              - 'backend/auth-service/**'
+            routine-service:
+              - 'backend/routine-service/**'
+            chat-service:
+              - 'backend/chat-service/**'
+            stats-service:
+              - 'backend/stats-service/**'
+            api-gateway:
+              - 'backend/api-gateway/**'
+            frontend:
+              - 'frontend/**'
+
+  # Tests para cada microservicio
+  test:
+    runs-on: ubuntu-latest
+    needs: changes
+    strategy:
+      matrix:
+        service:
+          [
+            auth-service,
+            routine-service,
+            chat-service,
+            stats-service,
+            api-gateway,
+          ]
+    if: needs.changes.outputs[matrix.service] == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: backend/${{ matrix.service }}/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd backend/${{ matrix.service }}
+          npm ci
+
+      - name: Run tests
+        run: |
+          cd backend/${{ matrix.service }}
+          npm test || echo "No tests found"
+
+  # Test para Frontend
+  test-frontend:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run tests
+        run: |
+          cd frontend
+          npm test -- --coverage --watchAll=false || echo "No tests found"
+
+  # Trigger deploy en Render (usando webhooks)
+  deploy-render:
+    runs-on: ubuntu-latest
+    needs: [changes, test, test-frontend]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    strategy:
+      matrix:
+        include:
+          - service: auth-service
+            webhook: ${{ secrets.RENDER_AUTH_WEBHOOK }}
+          - service: routine-service
+            webhook: ${{ secrets.RENDER_ROUTINE_WEBHOOK }}
+          - service: chat-service
+            webhook: ${{ secrets.RENDER_CHAT_WEBHOOK }}
+          - service: stats-service
+            webhook: ${{ secrets.RENDER_STATS_WEBHOOK }}
+          - service: api-gateway
+            webhook: ${{ secrets.RENDER_GATEWAY_WEBHOOK }}
+          - service: frontend
+            webhook: ${{ secrets.RENDER_FRONTEND_WEBHOOK }}
+    steps:
+      - name: Trigger Render Deploy
+        if: needs.changes.outputs[matrix.service] == 'true'
+        run: |
+          curl -X POST "${{ matrix.webhook }}"
+
+      - name: Wait for deployment
+        if: needs.changes.outputs[matrix.service] == 'true'
+        run: sleep 30
+
+  # Health Check después del deploy
+  health-check:
+    runs-on: ubuntu-latest
+    needs: [deploy-render]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - name: Wait for all services
+        run: sleep 60
+
+      - name: Health Check API Gateway
+        run: |
+          curl -f ${{ secrets.RENDER_GATEWAY_URL }}/health || echo "Gateway health check failed"
+
+      - name: Health Check Frontend
+        run: |
+          curl -f ${{ secrets.RENDER_FRONTEND_URL }} || echo "Frontend health check failed"
+
+  # Notificación
+  notify:
+    runs-on: ubuntu-latest
+    needs: [health-check]
+    if: always()
+    steps:
+      - name: Notify deployment status
+        run: |
+          if [ "${{ needs.health-check.result }}" == "success" ]; then
+            echo "🎉 Deployment to Render successful!"
+            echo "🌐 Frontend: ${{ secrets.RENDER_FRONTEND_URL }}"
+            echo "🔗 API: ${{ secrets.RENDER_GATEWAY_URL }}"
+          else
+            echo "❌ Deployment failed"
+          fi

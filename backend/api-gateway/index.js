@@ -48,6 +48,8 @@ app.use(
       process.env.FRONTEND_URL,
     ].filter(Boolean),
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 app.use(compression());
@@ -71,6 +73,16 @@ app.use(express.json());
 // Metrics middleware
 app.use(collectHttpMetrics);
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    service: 'api-gateway',
+    message: 'FitManager360 API Gateway is running',
+    endpoints: ['/health', '/auth', '/routines', '/chat', '/stats', '/metrics'],
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'API Gateway is running' });
@@ -81,16 +93,21 @@ app.get('/metrics', metricsEndpoint);
 
 // Service configurations
 const services = {
-  auth: 'http://auth-service:3001',
-  routines: 'http://routine-service:3002',
-  chat: 'http://chat-service:3003',
-  stats: 'http://stats-service:3004',
+  auth: process.env.AUTH_SERVICE_URL || 'https://fitmanager-auth.onrender.com',
+  routines:
+    process.env.ROUTINE_SERVICE_URL ||
+    'https://fitmanager-routine.onrender.com',
+  chat: process.env.CHAT_SERVICE_URL || 'https://fitmanager-chat.onrender.com',
+  stats:
+    process.env.STATS_SERVICE_URL || 'https://fitmanager-stats.onrender.com',
 };
 
 // Generic proxy function - FIXED VERSION
 const proxyRequest = async (req, res, serviceUrl, serviceName) => {
   try {
-    console.log(`[${serviceName}] Incoming request: ${req.method} ${req.originalUrl}`);
+    console.log(
+      `[${serviceName}] Incoming request: ${req.method} ${req.originalUrl}`
+    );
     console.log(`[${serviceName}] Request body:`, req.body);
 
     let targetPath;
@@ -187,7 +204,7 @@ const proxyRequest = async (req, res, serviceUrl, serviceName) => {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-      url: error.config?.url
+      url: error.config?.url,
     });
     logger.error(`${serviceName} service error:`, error.message);
 
