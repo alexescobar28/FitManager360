@@ -13,6 +13,7 @@ export const useAuth = () => {
 
 // Configure axios defaults
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+console.log('API URL configured as:', API_URL);
 axios.defaults.baseURL = API_URL;
 
 // Add request interceptor to include token
@@ -49,7 +50,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
-    
+
     if (token && userData) {
       setUser(JSON.parse(userData));
       verifyToken(token);
@@ -61,9 +62,9 @@ export const AuthProvider = ({ children }) => {
   const verifyToken = async (token) => {
     try {
       const response = await axios.get('/api/auth/verify-token', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       if (response.data.valid) {
         setUser(response.data.user);
       } else {
@@ -81,17 +82,17 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post('/api/auth/login', { email, password });
       const { token, user } = response.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
-      
+
       return { success: true };
     } catch (error) {
       console.error('Login failed:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Login failed' 
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Login failed',
       };
     }
   };
@@ -101,28 +102,29 @@ export const AuthProvider = ({ children }) => {
       console.log('Attempting registration with data:', {
         username: userData.username,
         email: userData.email,
-        hasProfile: !!userData.profile
+        hasProfile: !!userData.profile,
       });
 
       const response = await axios.post('/api/auth/register', userData);
       console.log('Registration response:', response.data);
-      
+
       const { token, user } = response.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
-      
+
       return { success: true };
     } catch (error) {
       console.error('Registration failed:', {
         message: error.message,
         response: error.response?.data,
-        status: error.response?.status
+        status: error.response?.status,
       });
-      return { 
-        success: false, 
-        error: error.response?.data?.error || error.message || 'Registration failed' 
+      return {
+        success: false,
+        error:
+          error.response?.data?.error || error.message || 'Registration failed',
       };
     }
   };
@@ -131,7 +133,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-    
+
     // Redirect to login page
     window.location.href = '/login';
   };
@@ -140,16 +142,16 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.put('/api/auth/profile', profileData);
       const updatedUser = response.data.user;
-      
+
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
-      
+
       return { success: true };
     } catch (error) {
       console.error('Profile update failed:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Profile update failed' 
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Profile update failed',
       };
     }
   };
@@ -160,22 +162,25 @@ export const AuthProvider = ({ children }) => {
       return { success: true, message: response.data.message };
     } catch (error) {
       console.error('Forgot password failed:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Failed to send reset email' 
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Failed to send reset email',
       };
     }
   };
 
   const resetPassword = async (token, newPassword) => {
     try {
-      const response = await axios.post('/api/auth/reset-password', { token, newPassword });
+      const response = await axios.post('/api/auth/reset-password', {
+        token,
+        newPassword,
+      });
       return { success: true, message: response.data.message };
     } catch (error) {
       console.error('Reset password failed:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Password reset failed' 
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Password reset failed',
       };
     }
   };
@@ -188,12 +193,8 @@ export const AuthProvider = ({ children }) => {
     updateProfile,
     forgotPassword,
     resetPassword,
-    loading
+    loading,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

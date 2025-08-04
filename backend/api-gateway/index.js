@@ -40,6 +40,17 @@ const logger = winston.createLogger({
 
 // Security middleware
 app.use(helmet());
+
+// Debug CORS configuration
+console.log(
+  'CORS origins configured:',
+  [
+    'http://localhost:3000',
+    'http://localhost:8081',
+    process.env.FRONTEND_URL,
+  ].filter(Boolean)
+);
+
 app.use(
   cors({
     origin: [
