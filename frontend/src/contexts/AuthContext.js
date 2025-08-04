@@ -12,8 +12,14 @@ export const useAuth = () => {
 };
 
 // Configure axios defaults
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+// Temporarily hardcoded for production - replace with env var later
+const API_URL =
+  process.env.NODE_ENV === 'production'
+    ? 'https://fitmanager-gateway.onrender.com'
+    : process.env.REACT_APP_API_URL || 'http://localhost:8080';
 console.log('API URL configured as:', API_URL);
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
 axios.defaults.baseURL = API_URL;
 
 // Add request interceptor to include token
