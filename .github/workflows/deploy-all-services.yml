@@ -1,0 +1,75 @@
+name: Deploy All Microservices
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
+
+jobs:
+  deploy-auth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Deploy Auth Service
+        run: |
+          cd backend/auth-service
+          npm ci
+          echo "Deploying auth service..."
+
+  deploy-routine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Deploy Routine Service
+        run: |
+          cd backend/routine-service
+          npm ci
+          echo "Deploying routine service..."
+
+  deploy-chat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Deploy Chat Service
+        run: |
+          cd backend/chat-service
+          npm ci
+          echo "Deploying chat service..."
+
+  deploy-stats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Deploy Stats Service
+        run: |
+          cd backend/stats-service
+          npm ci
+          echo "Deploying stats service..."
+
+  deploy-gateway:
+    needs: [deploy-auth, deploy-routine, deploy-chat, deploy-stats]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Deploy API Gateway
+        run: |
+          cd backend/api-gateway
+          npm ci
+          echo "Deploying API Gateway..."

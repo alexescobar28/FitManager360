@@ -1,9 +1,21 @@
-{
-  'build':
-    {
-      'buildCommand': 'npm install',
-      'publishDirectory': '.',
-      'env': { 'NODE_VERSION': '18' },
-    },
-  'deploy': { 'startCommand': 'npm start', 'healthCheckPath': '/health' },
-}
+services:
+  - type: web
+    name: fitmanager-gateway
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: AUTH_SERVICE_URL
+        value: https://fitmanager-auth.onrender.com
+      - key: ROUTINE_SERVICE_URL
+        value: https://fitmanager-routine.onrender.com
+      - key: CHAT_SERVICE_URL
+        value: https://fitmanager-chat.onrender.com
+      - key: STATS_SERVICE_URL
+        value: https://fitmanager-stats.onrender.com
+      - key: FRONTEND_URL
+        value: https://fitmanager-frontend.onrender.com

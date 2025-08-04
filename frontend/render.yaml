@@ -1,9 +1,16 @@
-{
-  'build':
-    {
-      'buildCommand': 'npm install && npm run build',
-      'publishDirectory': 'build',
-      'env': { 'NODE_VERSION': '18' },
-    },
-  'deploy': { 'startCommand': 'npm start', 'healthCheckPath': '/' },
-}
+services:
+  - type: web
+    name: fitmanager-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://fitmanager-gateway.onrender.com
+    headers:
+      - path: /*
+        headers:
+          - key: X-Frame-Options
+            value: DENY
+          - key: X-Content-Type-Options
+            value: nosniff
