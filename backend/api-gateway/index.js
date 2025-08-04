@@ -42,22 +42,23 @@ const logger = winston.createLogger({
 app.use(helmet());
 
 // Debug CORS configuration
-console.log(
-  'CORS origins configured:',
-  [
-    'http://localhost:3000',
-    'http://localhost:8081',
-    process.env.FRONTEND_URL,
-  ].filter(Boolean)
-);
+console.log('Environment variables:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('FRONTEND_URL:', process.env.FRONTEND_URL);
+console.log('PORT:', process.env.PORT);
+
+const corsOrigins = [
+  'http://localhost:3000',
+  'http://localhost:8081',
+  'https://fitmanager-frontend.onrender.com', // Hardcoded fallback
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
+console.log('CORS origins configured:', corsOrigins);
 
 app.use(
   cors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:8081',
-      process.env.FRONTEND_URL,
-    ].filter(Boolean),
+    origin: corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
