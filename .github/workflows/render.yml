@@ -50,7 +50,6 @@ jobs:
             stats-service,
             api-gateway,
           ]
-    if: needs.changes.outputs[matrix.service] == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -60,11 +59,13 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
+        if: (matrix.service == 'auth-service' && needs.changes.outputs.auth-service == 'true') || (matrix.service == 'routine-service' && needs.changes.outputs.routine-service == 'true') || (matrix.service == 'chat-service' && needs.changes.outputs.chat-service == 'true') || (matrix.service == 'stats-service' && needs.changes.outputs.stats-service == 'true') || (matrix.service == 'api-gateway' && needs.changes.outputs.api-gateway == 'true')
         run: |
           cd backend/${{ matrix.service }}
           npm install
 
       - name: Run tests
+        if: (matrix.service == 'auth-service' && needs.changes.outputs.auth-service == 'true') || (matrix.service == 'routine-service' && needs.changes.outputs.routine-service == 'true') || (matrix.service == 'chat-service' && needs.changes.outputs.chat-service == 'true') || (matrix.service == 'stats-service' && needs.changes.outputs.stats-service == 'true') || (matrix.service == 'api-gateway' && needs.changes.outputs.api-gateway == 'true')
         run: |
           cd backend/${{ matrix.service }}
           npm test || echo "No tests found"
