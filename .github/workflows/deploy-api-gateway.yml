@@ -1,4 +1,4 @@
-name: Deploy API Gateway
+name: Build and Test API Gateway
 
 on:
   push:
@@ -9,33 +9,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build-and-test:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: backend/api-gateway/package-lock.json
-
-      - name: Install dependencies
-        run: |
-          cd backend/api-gateway
-          npm ci
-
-      - name: Run tests (if any)
-        run: |
-          cd backend/api-gateway
-          npm test --if-present
-
-      - name: Deploy to Render
-        uses: johnbeynon/render-deploy-action@v0.0.8
-        with:
-          service-id: ${{ secrets.RENDER_API_GATEWAY_SERVICE_ID }}
-          api-key: ${{ secrets.RENDER_API_KEY }}
-          wait-for-success: true
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: backend/api-gateway/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd backend/api-gateway
+        npm ci
+        
+    - name: Run tests (if any)
+      run: |
+        cd backend/api-gateway
+        npm test --if-present
+        
+    - name: Build success
+      run: echo "✅ API Gateway build and tests completed successfully. Render will auto-deploy on push to main branch."
