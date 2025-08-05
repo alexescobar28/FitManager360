@@ -97,7 +97,11 @@ app.get('/', (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'API Gateway is running' });
+  res.status(200).json({
+    status: 'API Gateway is running',
+    version: '1.0.1',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Metrics endpoint
