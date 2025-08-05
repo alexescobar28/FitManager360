@@ -84,25 +84,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const verifyToken = async (token) => {
-    try {
-      const response = await axios.get('/api/auth/verify-token', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.data.valid) {
-        setUser(response.data.user);
-      } else {
-        logout();
-      }
-    } catch (error) {
-      console.error('Token verification failed:', error);
-      logout();
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const login = async (email, password) => {
     try {
       const response = await axios.post('/api/auth/login', { email, password });

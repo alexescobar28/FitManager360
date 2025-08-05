@@ -11,3 +11,29 @@
 {"level":"info","message":"[DEBUG] cleanHeaders: {\"Content-Type\":\"application/json\",\"User-Agent\":\"API Gateway\",\"Accept\":\"application/json\"}","timestamp":"2025-08-05T06:29:36.120Z"}
 {"level":"error","message":"auth service error:","timestamp":"2025-08-05T06:29:36.414Z"}
 {"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:29:36 +0000] \"GET /api/auth HTTP/1.1\" 404 27 \"-\" \"-\"","timestamp":"2025-08-05T06:29:36.424Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:07:11:29 +0000] \"GET /health HTTP/1.1\" 200 92 \"-\" \"-\"","timestamp":"2025-08-05T07:11:29.613Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:07:11:29 +0000] \"GET / HTTP/1.1\" 200 160 \"-\" \"-\"","timestamp":"2025-08-05T07:11:29.654Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:07:11:29 +0000] \"GET /metrics HTTP/1.1\" 200 - \"-\" \"-\"","timestamp":"2025-08-05T07:11:29.699Z"}
+{"level":"warn","message":"404 - Route not found: GET /unknown-route","timestamp":"2025-08-05T07:11:29.735Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:07:11:29 +0000] \"GET /unknown-route HTTP/1.1\" 404 27 \"-\" \"-\"","timestamp":"2025-08-05T07:11:29.748Z"}
+{"level":"info","message":"auth service request: GET http://localhost:3001/","timestamp":"2025-08-05T07:11:29.769Z"}
+{"level":"info","message":"[DEBUG] req.originalUrl: /api/auth","timestamp":"2025-08-05T07:11:29.775Z"}
+{"level":"info","message":"[DEBUG] req.url: /api/auth","timestamp":"2025-08-05T07:11:29.778Z"}
+{"level":"info","message":"[DEBUG] targetPath: /","timestamp":"2025-08-05T07:11:29.783Z"}
+{"level":"info","message":"[DEBUG] url final: http://localhost:3001/","timestamp":"2025-08-05T07:11:29.788Z"}
+{"level":"info","message":"[DEBUG] cleanHeaders: {\"Content-Type\":\"application/json\",\"User-Agent\":\"API Gateway\",\"Accept\":\"application/json\"}","timestamp":"2025-08-05T07:11:29.791Z"}
+{"level":"error","message":"auth service error:","timestamp":"2025-08-05T07:11:29.925Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:07:11:29 +0000] \"GET /api/auth HTTP/1.1\" 503 36 \"-\" \"-\"","timestamp":"2025-08-05T07:11:29.932Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:07:11:54 +0000] \"GET /health HTTP/1.1\" 200 92 \"-\" \"-\"","timestamp":"2025-08-05T07:11:54.515Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:07:11:54 +0000] \"GET / HTTP/1.1\" 200 160 \"-\" \"-\"","timestamp":"2025-08-05T07:11:54.554Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:07:11:54 +0000] \"GET /metrics HTTP/1.1\" 200 - \"-\" \"-\"","timestamp":"2025-08-05T07:11:54.585Z"}
+{"level":"warn","message":"404 - Route not found: GET /unknown-route","timestamp":"2025-08-05T07:11:54.618Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:07:11:54 +0000] \"GET /unknown-route HTTP/1.1\" 404 27 \"-\" \"-\"","timestamp":"2025-08-05T07:11:54.632Z"}
+{"level":"info","message":"auth service request: GET http://localhost:3001/","timestamp":"2025-08-05T07:11:54.651Z"}
+{"level":"info","message":"[DEBUG] req.originalUrl: /api/auth","timestamp":"2025-08-05T07:11:54.657Z"}
+{"level":"info","message":"[DEBUG] req.url: /api/auth","timestamp":"2025-08-05T07:11:54.661Z"}
+{"level":"info","message":"[DEBUG] targetPath: /","timestamp":"2025-08-05T07:11:54.665Z"}
+{"level":"info","message":"[DEBUG] url final: http://localhost:3001/","timestamp":"2025-08-05T07:11:54.669Z"}
+{"level":"info","message":"[DEBUG] cleanHeaders: {\"Content-Type\":\"application/json\",\"User-Agent\":\"API Gateway\",\"Accept\":\"application/json\"}","timestamp":"2025-08-05T07:11:54.673Z"}
+{"level":"error","message":"auth service error:","timestamp":"2025-08-05T07:11:54.780Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:07:11:54 +0000] \"GET /api/auth HTTP/1.1\" 503 36 \"-\" \"-\"","timestamp":"2025-08-05T07:11:54.787Z"}

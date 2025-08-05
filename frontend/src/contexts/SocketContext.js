@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
 import io from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
@@ -32,18 +38,21 @@ export const SocketProvider = ({ children }) => {
   const [lastOnlineUsersUpdate, setLastOnlineUsersUpdate] = useState(0);
   const ONLINE_USERS_UPDATE_THROTTLE = 500; // 500ms throttle
 
-  const throttledUpdateOnlineUsers = (usersList) => {
-    const now = Date.now();
-    const timeSinceLastUpdate = now - lastOnlineUsersUpdate;
+  const throttledUpdateOnlineUsers = useCallback(
+    (usersList) => {
+      const now = Date.now();
+      const timeSinceLastUpdate = now - lastOnlineUsersUpdate;
 
-    if (timeSinceLastUpdate >= ONLINE_USERS_UPDATE_THROTTLE) {
-      console.log('Updating online users:', usersList.length);
-      setOnlineUsers(usersList);
-      setLastOnlineUsersUpdate(now);
-    } else {
-      console.log('Throttled online users update');
-    }
-  };
+      if (timeSinceLastUpdate >= ONLINE_USERS_UPDATE_THROTTLE) {
+        console.log('Updating online users:', usersList.length);
+        setOnlineUsers(usersList);
+        setLastOnlineUsersUpdate(now);
+      } else {
+        console.log('Throttled online users update');
+      }
+    },
+    [lastOnlineUsersUpdate]
+  );
 
   useEffect(() => {
     if (user) {
