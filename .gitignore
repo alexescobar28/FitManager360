@@ -1,2 +1,5 @@
 node_modules/
 .env
+
+# Monolith (not used in production)
+backend/monolith/
