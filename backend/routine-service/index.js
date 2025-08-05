@@ -552,8 +552,8 @@ app.post('/exercises/bulk', authenticateToken, async (req, res) => {
     for (const exerciseData of req.body.exercises) {
       const { error } = exerciseSchema_validation.validate(exerciseData);
       if (error) {
-        return res.status(400).json({ 
-          error: `Validation error for exercise "${exerciseData.name}": ${error.details[0].message}` 
+        return res.status(400).json({
+          error: `Validation error for exercise "${exerciseData.name}": ${error.details[0].message}`,
         });
       }
       exercises.push(exerciseData);
@@ -561,10 +561,10 @@ app.post('/exercises/bulk', authenticateToken, async (req, res) => {
 
     const createdExercises = await Exercise.insertMany(exercises);
     logger.info(`Bulk created ${createdExercises.length} exercises`);
-    
+
     res.status(201).json({
       message: `Successfully created ${createdExercises.length} exercises`,
-      exercises: createdExercises
+      exercises: createdExercises,
     });
   } catch (error) {
     logger.error('Bulk create exercises error:', error);
@@ -578,9 +578,9 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
     // Check if exercises already exist
     const existingCount = await Exercise.countDocuments();
     if (existingCount > 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Exercises already exist in database',
-        count: existingCount 
+        count: existingCount,
       });
     }
 
@@ -588,7 +588,8 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
       // Chest exercises
       {
         name: 'Press de Banca',
-        description: 'Ejercicio fundamental para el desarrollo del pecho, realizado acostado en un banco con barra.',
+        description:
+          'Ejercicio fundamental para el desarrollo del pecho, realizado acostado en un banco con barra.',
         muscleGroups: ['chest'],
         equipment: ['barbell'],
         difficulty: 'intermediate',
@@ -596,17 +597,18 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'Acuéstate en el banco con los pies firmes en el suelo',
           'Agarra la barra con las manos separadas al ancho de los hombros',
           'Baja la barra controladamente hasta el pecho',
-          'Empuja la barra hacia arriba hasta extender completamente los brazos'
+          'Empuja la barra hacia arriba hasta extender completamente los brazos',
         ],
         tips: [
           'Mantén los omóplatos retraídos',
           'No rebotes la barra en el pecho',
-          'Controla la respiración: inhala al bajar, exhala al subir'
-        ]
+          'Controla la respiración: inhala al bajar, exhala al subir',
+        ],
       },
       {
         name: 'Flexiones de Pecho',
-        description: 'Ejercicio básico de peso corporal para fortalecer pecho, hombros y tríceps.',
+        description:
+          'Ejercicio básico de peso corporal para fortalecer pecho, hombros y tríceps.',
         muscleGroups: ['chest', 'arms'],
         equipment: ['bodyweight'],
         difficulty: 'beginner',
@@ -614,17 +616,18 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'Colócate en posición de plancha con las manos al ancho de los hombros',
           'Mantén el cuerpo recto desde la cabeza hasta los pies',
           'Baja el cuerpo hasta que el pecho casi toque el suelo',
-          'Empuja hacia arriba hasta la posición inicial'
+          'Empuja hacia arriba hasta la posición inicial',
         ],
         tips: [
           'Mantén el core activado',
           'No dejes caer las caderas',
-          'Controla el movimiento en ambas fases'
-        ]
+          'Controla el movimiento en ambas fases',
+        ],
       },
       {
         name: 'Aperturas con Mancuernas',
-        description: 'Ejercicio de aislamiento para el pecho usando mancuernas.',
+        description:
+          'Ejercicio de aislamiento para el pecho usando mancuernas.',
         muscleGroups: ['chest'],
         equipment: ['dumbbells'],
         difficulty: 'intermediate',
@@ -632,19 +635,20 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'Acuéstate en un banco con una mancuerna en cada mano',
           'Extiende los brazos hacia arriba con las palmas enfrentadas',
           'Baja las mancuernas en arco amplio hasta sentir estiramiento en el pecho',
-          'Regresa a la posición inicial contrayendo el pecho'
+          'Regresa a la posición inicial contrayendo el pecho',
         ],
         tips: [
           'Mantén una ligera flexión en los codos',
           'Controla el peso en todo el rango de movimiento',
-          'No bajes demasiado para evitar lesiones'
-        ]
+          'No bajes demasiado para evitar lesiones',
+        ],
       },
 
       // Back exercises
       {
         name: 'Dominadas',
-        description: 'Ejercicio de peso corporal para desarrollar la espalda y bíceps.',
+        description:
+          'Ejercicio de peso corporal para desarrollar la espalda y bíceps.',
         muscleGroups: ['back', 'arms'],
         equipment: ['bodyweight'],
         difficulty: 'advanced',
@@ -652,17 +656,18 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'Cuelga de una barra con agarre pronado, manos al ancho de los hombros',
           'Activa el core y mantén las piernas ligeramente flexionadas',
           'Tira del cuerpo hacia arriba hasta que la barbilla pase la barra',
-          'Baja controladamente hasta la posición inicial'
+          'Baja controladamente hasta la posición inicial',
         ],
         tips: [
           'Evita balancearte',
           'Inicia el movimiento con los músculos de la espalda',
-          'Si no puedes hacer dominadas completas, usa bandas de resistencia'
-        ]
+          'Si no puedes hacer dominadas completas, usa bandas de resistencia',
+        ],
       },
       {
         name: 'Remo con Barra',
-        description: 'Ejercicio compuesto para desarrollar la espalda media y baja.',
+        description:
+          'Ejercicio compuesto para desarrollar la espalda media y baja.',
         muscleGroups: ['back'],
         equipment: ['barbell'],
         difficulty: 'intermediate',
@@ -670,13 +675,13 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'De pie con los pies al ancho de los hombros, sostén la barra',
           'Inclínate hacia adelante manteniendo la espalda recta',
           'Tira de la barra hacia el abdomen bajo',
-          'Baja la barra controladamente'
+          'Baja la barra controladamente',
         ],
         tips: [
           'Mantén el core activado',
           'No uses impulso',
-          'Aprieta los omóplatos al tirar'
-        ]
+          'Aprieta los omóplatos al tirar',
+        ],
       },
       {
         name: 'Jalones al Pecho',
@@ -688,19 +693,20 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'Siéntate en la máquina con los muslos asegurados',
           'Agarra la barra con agarre amplio',
           'Tira de la barra hacia el pecho superior',
-          'Regresa controladamente a la posición inicial'
+          'Regresa controladamente a la posición inicial',
         ],
         tips: [
           'Inclínate ligeramente hacia atrás',
           'Enfócate en usar los músculos de la espalda',
-          'No uses impulso'
-        ]
+          'No uses impulso',
+        ],
       },
 
       // Leg exercises
       {
         name: 'Sentadillas',
-        description: 'Ejercicio fundamental para el desarrollo de las piernas y glúteos.',
+        description:
+          'Ejercicio fundamental para el desarrollo de las piernas y glúteos.',
         muscleGroups: ['legs'],
         equipment: ['bodyweight'],
         difficulty: 'beginner',
@@ -709,17 +715,18 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'Baja como si fueras a sentarte en una silla',
           'Mantén el pecho erguido y las rodillas alineadas con los pies',
           'Baja hasta que los muslos estén paralelos al suelo',
-          'Empuja a través de los talones para volver arriba'
+          'Empuja a través de los talones para volver arriba',
         ],
         tips: [
           'Mantén el peso en los talones',
           'No dejes que las rodillas se vayan hacia adentro',
-          'Mantén el core activado'
-        ]
+          'Mantén el core activado',
+        ],
       },
       {
         name: 'Peso Muerto',
-        description: 'Ejercicio compuesto que trabaja toda la cadena posterior.',
+        description:
+          'Ejercicio compuesto que trabaja toda la cadena posterior.',
         muscleGroups: ['legs', 'back'],
         equipment: ['barbell'],
         difficulty: 'advanced',
@@ -727,13 +734,13 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'De pie con la barra frente a ti, pies al ancho de caderas',
           'Agáchate y agarra la barra con las manos al ancho de los hombros',
           'Mantén la espalda recta y levanta la barra extendiendo caderas y rodillas',
-          'Termina de pie con los hombros hacia atrás'
+          'Termina de pie con los hombros hacia atrás',
         ],
         tips: [
           'Mantén la barra cerca del cuerpo',
           'No redondees la espalda',
-          'Inicia el movimiento con las caderas'
-        ]
+          'Inicia el movimiento con las caderas',
+        ],
       },
       {
         name: 'Zancadas',
@@ -745,13 +752,13 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'De pie con los pies juntos',
           'Da un paso largo hacia adelante',
           'Baja hasta que ambas rodillas estén a 90 grados',
-          'Empuja con la pierna delantera para volver a la posición inicial'
+          'Empuja con la pierna delantera para volver a la posición inicial',
         ],
         tips: [
           'Mantén el torso erguido',
           'No dejes que la rodilla delantera pase los dedos del pie',
-          'Alterna las piernas'
-        ]
+          'Alterna las piernas',
+        ],
       },
 
       // Shoulder exercises
@@ -765,13 +772,13 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'De pie con los pies al ancho de los hombros',
           'Sostén la barra a la altura de los hombros',
           'Empuja la barra directamente hacia arriba',
-          'Baja controladamente a la posición inicial'
+          'Baja controladamente a la posición inicial',
         ],
         tips: [
           'Mantén el core activado',
           'No arquees excesivamente la espalda',
-          'Empuja la cabeza ligeramente hacia adelante al final del movimiento'
-        ]
+          'Empuja la cabeza ligeramente hacia adelante al final del movimiento',
+        ],
       },
       {
         name: 'Elevaciones Laterales',
@@ -783,13 +790,13 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'De pie con una mancuerna en cada mano a los lados',
           'Levanta los brazos hacia los lados hasta la altura de los hombros',
           'Mantén una ligera flexión en los codos',
-          'Baja controladamente'
+          'Baja controladamente',
         ],
         tips: [
           'No uses impulso',
           'Mantén los hombros hacia abajo',
-          'Controla el movimiento en ambas direcciones'
-        ]
+          'Controla el movimiento en ambas direcciones',
+        ],
       },
 
       // Arm exercises
@@ -803,47 +810,49 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'De pie con una mancuerna en cada mano, brazos a los lados',
           'Mantén los codos pegados al torso',
           'Flexiona los brazos llevando las mancuernas hacia los hombros',
-          'Baja controladamente'
+          'Baja controladamente',
         ],
         tips: [
           'No balancees el cuerpo',
           'Mantén los codos fijos',
-          'Controla la fase excéntrica'
-        ]
+          'Controla la fase excéntrica',
+        ],
       },
       {
         name: 'Extensiones de Tríceps',
-        description: 'Ejercicio para desarrollar la parte posterior de los brazos.',
+        description:
+          'Ejercicio para desarrollar la parte posterior de los brazos.',
         muscleGroups: ['arms'],
         equipment: ['dumbbells'],
         difficulty: 'beginner',
         instructions: [
           'Acostado en un banco, sostén una mancuerna con ambas manos sobre el pecho',
           'Baja la mancuerna detrás de la cabeza flexionando solo los codos',
-          'Extiende los brazos para volver a la posición inicial'
+          'Extiende los brazos para volver a la posición inicial',
         ],
         tips: [
           'Mantén los codos fijos',
           'No uses peso excesivo',
-          'Controla el movimiento'
-        ]
+          'Controla el movimiento',
+        ],
       },
       {
         name: 'Fondos en Paralelas',
-        description: 'Ejercicio de peso corporal para tríceps y pecho inferior.',
+        description:
+          'Ejercicio de peso corporal para tríceps y pecho inferior.',
         muscleGroups: ['arms', 'chest'],
         equipment: ['bodyweight'],
         difficulty: 'intermediate',
         instructions: [
           'Sujétate en las barras paralelas con los brazos extendidos',
           'Baja el cuerpo flexionando los codos',
-          'Empuja hacia arriba hasta extender completamente los brazos'
+          'Empuja hacia arriba hasta extender completamente los brazos',
         ],
         tips: [
           'Mantén el cuerpo ligeramente inclinado hacia adelante',
           'No bajes demasiado para evitar lesiones en los hombros',
-          'Controla el movimiento'
-        ]
+          'Controla el movimiento',
+        ],
       },
 
       // Core exercises
@@ -857,13 +866,13 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'Colócate en posición de flexión pero apoyado en los antebrazos',
           'Mantén el cuerpo recto desde la cabeza hasta los pies',
           'Mantén la posición el tiempo indicado',
-          'Respira normalmente durante el ejercicio'
+          'Respira normalmente durante el ejercicio',
         ],
         tips: [
           'No dejes caer las caderas',
           'Mantén el cuello neutro',
-          'Aprieta los glúteos y abdominales'
-        ]
+          'Aprieta los glúteos y abdominales',
+        ],
       },
       {
         name: 'Abdominales Crunch',
@@ -875,17 +884,18 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'Acuéstate boca arriba con las rodillas flexionadas',
           'Coloca las manos detrás de la cabeza',
           'Levanta los hombros del suelo contrayendo los abdominales',
-          'Baja controladamente'
+          'Baja controladamente',
         ],
         tips: [
           'No tires del cuello',
           'Enfócate en la contracción abdominal',
-          'Exhala al subir'
-        ]
+          'Exhala al subir',
+        ],
       },
       {
         name: 'Mountain Climbers',
-        description: 'Ejercicio dinámico que combina cardio y fortalecimiento del core.',
+        description:
+          'Ejercicio dinámico que combina cardio y fortalecimiento del core.',
         muscleGroups: ['core', 'cardio'],
         equipment: ['bodyweight'],
         difficulty: 'intermediate',
@@ -893,19 +903,20 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'Comienza en posición de plancha alta',
           'Lleva una rodilla hacia el pecho',
           'Cambia rápidamente de pierna',
-          'Mantén un ritmo constante'
+          'Mantén un ritmo constante',
         ],
         tips: [
           'Mantén las caderas estables',
           'No dejes que las caderas suban',
-          'Mantén el core activado'
-        ]
+          'Mantén el core activado',
+        ],
       },
 
       // Cardio exercises
       {
         name: 'Burpees',
-        description: 'Ejercicio de cuerpo completo que combina fuerza y cardio.',
+        description:
+          'Ejercicio de cuerpo completo que combina fuerza y cardio.',
         muscleGroups: ['cardio'],
         equipment: ['bodyweight'],
         difficulty: 'intermediate',
@@ -913,13 +924,13 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'De pie, baja a posición de cuclillas',
           'Coloca las manos en el suelo y salta los pies hacia atrás',
           'Haz una flexión',
-          'Salta los pies hacia adelante y salta hacia arriba'
+          'Salta los pies hacia adelante y salta hacia arriba',
         ],
         tips: [
           'Mantén un ritmo constante',
           'Modifica el ejercicio si es necesario',
-          'Respira de manera controlada'
-        ]
+          'Respira de manera controlada',
+        ],
       },
       {
         name: 'Jumping Jacks',
@@ -931,19 +942,20 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'De pie con los pies juntos y brazos a los lados',
           'Salta separando los pies y levantando los brazos sobre la cabeza',
           'Salta de nuevo para volver a la posición inicial',
-          'Repite de manera continua'
+          'Repite de manera continua',
         ],
         tips: [
           'Mantén un ritmo constante',
           'Aterriza suavemente',
-          'Mantén el core activado'
-        ]
+          'Mantén el core activado',
+        ],
       },
 
       // Functional exercises
       {
         name: 'Thrusters',
-        description: 'Ejercicio funcional que combina sentadilla y press de hombros.',
+        description:
+          'Ejercicio funcional que combina sentadilla y press de hombros.',
         muscleGroups: ['legs', 'shoulders'],
         equipment: ['dumbbells'],
         difficulty: 'intermediate',
@@ -951,17 +963,18 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'De pie con mancuernas a la altura de los hombros',
           'Haz una sentadilla completa',
           'Al subir, empuja las mancuernas hacia arriba',
-          'Baja las mancuernas mientras bajas a la siguiente sentadilla'
+          'Baja las mancuernas mientras bajas a la siguiente sentadilla',
         ],
         tips: [
           'Usa el impulso de las piernas para ayudar con el press',
           'Mantén el core activado',
-          'Controla el ritmo'
-        ]
+          'Controla el ritmo',
+        ],
       },
       {
         name: 'Kettlebell Swings',
-        description: 'Ejercicio dinámico para desarrollar potencia y resistencia.',
+        description:
+          'Ejercicio dinámico para desarrollar potencia y resistencia.',
         muscleGroups: ['legs', 'back', 'core'],
         equipment: ['kettlebell'],
         difficulty: 'intermediate',
@@ -969,22 +982,22 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
           'De pie con los pies al ancho de los hombros, kettlebell entre las piernas',
           'Flexiona las caderas y agarra la kettlebell',
           'Impulsa las caderas hacia adelante para balancear la kettlebell',
-          'Deja que la kettlebell baje entre las piernas y repite'
+          'Deja que la kettlebell baje entre las piernas y repite',
         ],
         tips: [
           'El movimiento viene de las caderas, no de los brazos',
           'Mantén la espalda recta',
-          'Aprieta los glúteos en la parte superior del movimiento'
-        ]
-      }
+          'Aprieta los glúteos en la parte superior del movimiento',
+        ],
+      },
     ];
 
     const createdExercises = await Exercise.insertMany(defaultExercises);
     logger.info(`Seeded ${createdExercises.length} default exercises`);
-    
+
     res.status(201).json({
       message: `Successfully seeded ${createdExercises.length} exercises`,
-      exercises: createdExercises
+      exercises: createdExercises,
     });
   } catch (error) {
     logger.error('Seed exercises error:', error);
@@ -996,9 +1009,9 @@ app.post('/exercises/seed', authenticateToken, async (req, res) => {
 app.get('/routines', authenticateToken, async (req, res) => {
   try {
     const { page = 1, limit = 10, category, difficulty, isPublic } = req.query;
-    const filter = { 
+    const filter = {
       userId: req.user.id,
-      isActive: true 
+      isActive: true,
     };
 
     if (category) filter.category = category;
@@ -1211,8 +1224,11 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 3002;
 
-app.listen(PORT, () => {
-  logger.info(`Routine Service running on port ${PORT}`);
-});
+// Only start server if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    logger.info(`Routine Service running on port ${PORT}`);
+  });
+}
 
 module.exports = app;

@@ -1,0 +1,12 @@
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:14:09 +0000] \"GET /health HTTP/1.1\" 200 40 \"-\" \"-\"","timestamp":"2025-08-05T06:14:09.072Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-08-05T06:14:09.091Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:14:09 +0000] \"GET / HTTP/1.1\" 200 146 \"-\" \"-\"","timestamp":"2025-08-05T06:14:09.225Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:14:09 +0000] \"GET /metrics HTTP/1.1\" 200 - \"-\" \"-\"","timestamp":"2025-08-05T06:14:09.260Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:14:09 +0000] \"POST /register HTTP/1.1\" 400 66 \"-\" \"-\"","timestamp":"2025-08-05T06:14:09.569Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:14:09 +0000] \"POST /login HTTP/1.1\" 400 33 \"-\" \"-\"","timestamp":"2025-08-05T06:14:09.611Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:15:38 +0000] \"GET /health HTTP/1.1\" 200 40 \"-\" \"-\"","timestamp":"2025-08-05T06:15:38.864Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-08-05T06:15:38.888Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:15:38 +0000] \"GET / HTTP/1.1\" 200 146 \"-\" \"-\"","timestamp":"2025-08-05T06:15:38.978Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:15:39 +0000] \"GET /metrics HTTP/1.1\" 200 - \"-\" \"-\"","timestamp":"2025-08-05T06:15:39.041Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:15:39 +0000] \"POST /register HTTP/1.1\" 400 66 \"-\" \"-\"","timestamp":"2025-08-05T06:15:39.121Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:15:39 +0000] \"POST /login HTTP/1.1\" 400 33 \"-\" \"-\"","timestamp":"2025-08-05T06:15:39.163Z"}

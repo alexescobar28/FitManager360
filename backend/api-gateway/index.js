@@ -306,6 +306,12 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => {
-  logger.info(`API Gateway running on port ${PORT}`);
-});
+
+// Only start server if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+    logger.info(`API Gateway running on port ${PORT}`);
+  });
+}
+
+module.exports = { app, server };

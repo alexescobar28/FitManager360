@@ -24,45 +24,54 @@ const logger = winston.createLogger({
   transports: [
     new winston.transports.File({ filename: 'error.log', level: 'error' }),
     new winston.transports.File({ filename: 'combined.log' }),
-    new winston.transports.Console()
-  ]
+    new winston.transports.Console(),
+  ],
 });
 
 // Socket.io configuration
 const io = socketIo(server, {
   cors: {
     origin: [
-      "http://localhost:3000",
-      "http://localhost:8081",
-      process.env.FRONTEND_URL
+      'http://localhost:3000',
+      'http://localhost:8081',
+      process.env.FRONTEND_URL,
     ].filter(Boolean),
-    methods: ["GET", "POST"]
-  }
+    methods: ['GET', 'POST'],
+  },
 });
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "http://localhost:8081",
-    process.env.FRONTEND_URL
-  ].filter(Boolean),
-  credentials: true
-}));
-app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
+app.use(
+  cors({
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:8081',
+      process.env.FRONTEND_URL,
+    ].filter(Boolean),
+    credentials: true,
+  })
+);
+app.use(
+  morgan('combined', {
+    stream: { write: (message) => logger.info(message.trim()) },
+  })
+);
 app.use(express.json());
 
 // Metrics middleware
 app.use(collectHttpMetrics);
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/fitmanager_chat', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
-});
+mongoose.connect(
+  process.env.MONGODB_URI || 'mongodb://localhost:27017/fitmanager_chat',
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+  }
+);
 
 mongoose.connection.on('connected', () => {
   logger.info('Connected to MongoDB');
@@ -80,148 +89,161 @@ mongoose.connection.on('disconnected', () => {
 });
 
 // Chat Room Schema
-const chatRoomSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true
+const chatRoomSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
+    type: {
+      type: String,
+      enum: ['public', 'private', 'direct'],
+      default: 'public',
+    },
+    participants: [
+      {
+        userId: {
+          type: String,
+          required: true,
+        },
+        username: {
+          type: String,
+          required: true,
+        },
+        joinedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        role: {
+          type: String,
+          enum: ['admin', 'member'],
+          default: 'member',
+        },
+      },
+    ],
+    createdBy: {
+      type: String,
+      required: true,
+    },
+    lastMessage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Message',
+    },
+    lastActivity: {
+      type: Date,
+      default: Date.now,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    lastActivity: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  description: {
-    type: String,
-    trim: true
+  {
+    timestamps: true,
+  }
+);
+
+// Message Schema
+const messageSchema = new mongoose.Schema(
+  {
+    roomId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ChatRoom',
+      required: true,
+      index: true,
+    },
+    senderId: {
+      type: String,
+      required: true,
+    },
+    senderUsername: {
+      type: String,
+      required: true,
+    },
+    content: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    messageType: {
+      type: String,
+      enum: ['text', 'image', 'file', 'system'],
+      default: 'text',
+    },
+    edited: {
+      type: Boolean,
+      default: false,
+    },
+    editedAt: Date,
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: Date,
+    reactions: [
+      {
+        userId: String,
+        username: String,
+        emoji: String,
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    replyTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Message',
+    },
   },
-  type: {
-    type: String,
-    enum: ['public', 'private', 'direct'],
-    default: 'public'
-  },
-  participants: [{
+  {
+    timestamps: true,
+  }
+);
+
+// Online Users Schema
+const onlineUserSchema = new mongoose.Schema(
+  {
     userId: {
       type: String,
-      required: true
+      required: true,
+      unique: true,
     },
     username: {
       type: String,
-      required: true
+      required: true,
     },
-    joinedAt: {
-      type: Date,
-      default: Date.now
-    },
-    role: {
+    socketId: {
       type: String,
-      enum: ['admin', 'member'],
-      default: 'member'
-    }
-  }],
-  createdBy: {
-    type: String,
-    required: true
-  },
-  lastMessage: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Message'
-  },
-  lastActivity: {
-    type: Date,
-    default: Date.now
-  },
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  lastActivity: {
-    type: Date,
-    default: Date.now
-  }
-}, {
-  timestamps: true
-});
-
-// Message Schema
-const messageSchema = new mongoose.Schema({
-  roomId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'ChatRoom',
-    required: true,
-    index: true
-  },
-  senderId: {
-    type: String,
-    required: true
-  },
-  senderUsername: {
-    type: String,
-    required: true
-  },
-  content: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  messageType: {
-    type: String,
-    enum: ['text', 'image', 'file', 'system'],
-    default: 'text'
-  },
-  edited: {
-    type: Boolean,
-    default: false
-  },
-  editedAt: Date,
-  deleted: {
-    type: Boolean,
-    default: false
-  },
-  deletedAt: Date,
-  reactions: [{
-    userId: String,
-    username: String,
-    emoji: String,
-    createdAt: {
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ['online', 'away', 'busy'],
+      default: 'online',
+    },
+    currentRoom: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ChatRoom',
+    },
+    lastSeen: {
       type: Date,
-      default: Date.now
-    }
-  }],
-  replyTo: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Message'
+      default: Date.now,
+    },
+  },
+  {
+    timestamps: true,
   }
-}, {
-  timestamps: true
-});
-
-// Online Users Schema
-const onlineUserSchema = new mongoose.Schema({
-  userId: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  username: {
-    type: String,
-    required: true
-  },
-  socketId: {
-    type: String,
-    required: true
-  },
-  status: {
-    type: String,
-    enum: ['online', 'away', 'busy'],
-    default: 'online'
-  },
-  currentRoom: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'ChatRoom'
-  },
-  lastSeen: {
-    type: Date,
-    default: Date.now
-  }
-}, {
-  timestamps: true
-});
+);
 
 const ChatRoom = mongoose.model('ChatRoom', chatRoomSchema);
 const Message = mongoose.model('Message', messageSchema);
@@ -236,27 +258,31 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: 'Access token required' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', (err, user) => {
-    if (err) {
-      return res.status(403).json({ error: 'Invalid token' });
+  jwt.verify(
+    token,
+    process.env.JWT_SECRET || 'your-secret-key',
+    (err, user) => {
+      if (err) {
+        return res.status(403).json({ error: 'Invalid token' });
+      }
+      req.user = user;
+      next();
     }
-    req.user = user;
-    next();
-  });
+  );
 };
 
 // Validation schemas
 const createRoomSchema = Joi.object({
   name: Joi.string().min(3).max(50).required(),
   description: Joi.string().max(200),
-  type: Joi.string().valid('public', 'private', 'direct').default('public')
+  type: Joi.string().valid('public', 'private', 'direct').default('public'),
 });
 
 const sendMessageSchema = Joi.object({
   roomId: Joi.string().required(),
   content: Joi.string().min(1).max(1000).required(),
   messageType: Joi.string().valid('text', 'image', 'file').default('text'),
-  replyTo: Joi.string().optional()
+  replyTo: Joi.string().optional(),
 });
 
 // HTTP Routes
@@ -274,10 +300,7 @@ app.get('/rooms', authenticateToken, async (req, res) => {
   try {
     const { page = 1, limit = 20, type } = req.query;
     const filter = {
-      $or: [
-        { type: 'public' },
-        { 'participants.userId': req.user.id }
-      ]
+      $or: [{ type: 'public' }, { 'participants.userId': req.user.id }],
     };
 
     if (type) {
@@ -295,7 +318,7 @@ app.get('/rooms', authenticateToken, async (req, res) => {
       rooms,
       totalPages: Math.ceil(total / limit),
       currentPage: page,
-      total
+      total,
     });
   } catch (error) {
     logger.error('Get rooms error:', error);
@@ -314,11 +337,13 @@ app.post('/rooms', authenticateToken, async (req, res) => {
     const room = new ChatRoom({
       ...req.body,
       createdBy: req.user.id,
-      participants: [{
-        userId: req.user.id,
-        username: req.user.username,
-        role: 'admin'
-      }]
+      participants: [
+        {
+          userId: req.user.id,
+          username: req.user.username,
+          role: 'admin',
+        },
+      ],
     });
 
     await room.save();
@@ -340,7 +365,9 @@ app.post('/rooms/:roomId/join', authenticateToken, async (req, res) => {
     }
 
     // Check if user is already in room
-    const existingParticipant = room.participants.find(p => p.userId === req.user.id);
+    const existingParticipant = room.participants.find(
+      (p) => p.userId === req.user.id
+    );
     if (existingParticipant) {
       return res.status(400).json({ error: 'Already in room' });
     }
@@ -348,7 +375,7 @@ app.post('/rooms/:roomId/join', authenticateToken, async (req, res) => {
     // Add user to room
     room.participants.push({
       userId: req.user.id,
-      username: req.user.username
+      username: req.user.username,
     });
 
     await room.save();
@@ -365,30 +392,32 @@ app.post('/rooms/:roomId/join', authenticateToken, async (req, res) => {
 app.get('/rooms/:roomId/messages', authenticateToken, async (req, res) => {
   try {
     const { page = 1, limit = 50 } = req.query;
-    
+
     // Check if user is in room
     const room = await ChatRoom.findById(req.params.roomId);
     if (!room) {
       return res.status(404).json({ error: 'Room not found' });
     }
 
-    const isParticipant = room.participants.some(p => p.userId === req.user.id);
+    const isParticipant = room.participants.some(
+      (p) => p.userId === req.user.id
+    );
     if (!isParticipant && room.type !== 'public') {
       return res.status(403).json({ error: 'Not authorized to view messages' });
     }
 
-    const messages = await Message.find({ 
+    const messages = await Message.find({
       roomId: req.params.roomId,
-      deleted: false
+      deleted: false,
     })
       .populate('replyTo')
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .sort({ createdAt: -1 });
 
-    const total = await Message.countDocuments({ 
+    const total = await Message.countDocuments({
       roomId: req.params.roomId,
-      deleted: false
+      deleted: false,
     });
 
     // Devolver directamente el array para que el frontend pueda usar .map()
@@ -402,9 +431,9 @@ app.get('/rooms/:roomId/messages', authenticateToken, async (req, res) => {
 // Get online users
 app.get('/users/online', authenticateToken, async (req, res) => {
   try {
-    const onlineUsers = await OnlineUser.find({ 
+    const onlineUsers = await OnlineUser.find({
       status: 'online',
-      userId: { $ne: req.user.id } // Exclude current user
+      userId: { $ne: req.user.id }, // Exclude current user
     })
       .select('userId username status currentRoom lastSeen')
       .sort({ lastSeen: -1 });
@@ -440,7 +469,7 @@ app.post('/users/:userId/chat', authenticateToken, async (req, res) => {
     // Check if direct chat room already exists
     let room = await ChatRoom.findOne({
       name: roomName,
-      type: 'direct'
+      type: 'direct',
     });
 
     if (!room) {
@@ -454,18 +483,20 @@ app.post('/users/:userId/chat', authenticateToken, async (req, res) => {
           {
             userId: currentUserId,
             username: req.user.username,
-            role: 'member'
+            role: 'member',
           },
           {
             userId: targetUserId,
             username: targetUser.username,
-            role: 'member'
-          }
-        ]
+            role: 'member',
+          },
+        ],
       });
 
       await room.save();
-      logger.info(`Direct chat created between ${req.user.username} and ${targetUser.username}`);
+      logger.info(
+        `Direct chat created between ${req.user.username} and ${targetUser.username}`
+      );
     }
 
     res.json({
@@ -475,8 +506,8 @@ app.post('/users/:userId/chat', authenticateToken, async (req, res) => {
       targetUser: {
         userId: targetUser.userId,
         username: targetUser.username,
-        status: targetUser.status
-      }
+        status: targetUser.status,
+      },
     });
   } catch (error) {
     logger.error('Start private chat error:', error);
@@ -488,22 +519,24 @@ app.post('/users/:userId/chat', authenticateToken, async (req, res) => {
 app.get('/conversations', authenticateToken, async (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query;
-    
+
     const conversations = await ChatRoom.find({
       type: 'direct',
-      'participants.userId': req.user.id
+      'participants.userId': req.user.id,
     })
       .populate({
         path: 'lastMessage',
-        model: 'Message'
+        model: 'Message',
       })
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .sort({ lastActivity: -1 });
 
     // Format conversations to show the other participant
-    const formattedConversations = conversations.map(conv => {
-      const otherParticipant = conv.participants.find(p => p.userId !== req.user.id);
+    const formattedConversations = conversations.map((conv) => {
+      const otherParticipant = conv.participants.find(
+        (p) => p.userId !== req.user.id
+      );
       return {
         id: conv._id,
         _id: conv._id,
@@ -512,13 +545,13 @@ app.get('/conversations', authenticateToken, async (req, res) => {
         otherUser: otherParticipant,
         lastMessage: conv.lastMessage,
         lastActivity: conv.lastActivity,
-        createdAt: conv.createdAt
+        createdAt: conv.createdAt,
       };
     });
 
     const total = await ChatRoom.countDocuments({
       type: 'direct',
-      'participants.userId': req.user.id
+      'participants.userId': req.user.id,
     });
 
     // Devolver directamente el array para que el frontend pueda usar .map()
@@ -535,26 +568,45 @@ io.use(async (socket, next) => {
   try {
     const token = socket.handshake.auth.token;
     logger.info(`Socket authentication attempt - Token present: ${!!token}`);
-    
+
     if (!token) {
       logger.warn('Socket authentication failed - No token provided');
       return next(new Error('Authentication error: No token provided'));
     }
 
     // Log first 50 characters of token for debugging
-    logger.info(`Socket authentication - Token (first 50 chars): ${token.substring(0, 50)}`);
-    
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    logger.info(`Socket authentication - JWT decoded successfully. Fields: ${Object.keys(decoded).join(', ')}`);
-    logger.info(`Socket authentication - User ID: ${decoded.id}, Username: ${decoded.username}`);
-    
+    logger.info(
+      `Socket authentication - Token (first 50 chars): ${token.substring(
+        0,
+        50
+      )}`
+    );
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || 'your-secret-key'
+    );
+    logger.info(
+      `Socket authentication - JWT decoded successfully. Fields: ${Object.keys(
+        decoded
+      ).join(', ')}`
+    );
+    logger.info(
+      `Socket authentication - User ID: ${decoded.id}, Username: ${decoded.username}`
+    );
+
     socket.userId = decoded.id;
     socket.username = decoded.username;
-    logger.info(`Socket authentication successful for user: ${socket.username}`);
+    logger.info(
+      `Socket authentication successful for user: ${socket.username}`
+    );
     next();
   } catch (error) {
     logger.error('Socket authentication error:', error.message);
-    logger.error('Socket authentication - JWT_SECRET being used:', process.env.JWT_SECRET ? 'Present' : 'Missing');
+    logger.error(
+      'Socket authentication - JWT_SECRET being used:',
+      process.env.JWT_SECRET ? 'Present' : 'Missing'
+    );
     next(new Error('Authentication error: ' + error.message));
   }
 });
@@ -566,42 +618,46 @@ const MIN_BROADCAST_INTERVAL = 1000; // Minimum 1 second between broadcasts
 
 const broadcastOnlineUsers = async () => {
   clearTimeout(broadcastTimeout);
-  
+
   const now = Date.now();
   const timeSinceLastBroadcast = now - lastBroadcastTime;
-  
+
   if (timeSinceLastBroadcast < MIN_BROADCAST_INTERVAL) {
     // Schedule broadcast for later
     const delay = MIN_BROADCAST_INTERVAL - timeSinceLastBroadcast;
     broadcastTimeout = setTimeout(broadcastOnlineUsers, delay);
     return;
   }
-  
+
   broadcastTimeout = setTimeout(async () => {
     try {
       // Clean up users who are marked as online but don't have active socket connections
       const connectedSocketIds = Array.from(io.sockets.sockets.keys());
       await OnlineUser.updateMany(
-        { 
+        {
           status: 'online',
-          socketId: { $nin: connectedSocketIds }
+          socketId: { $nin: connectedSocketIds },
         },
-        { 
+        {
           status: 'offline',
-          lastSeen: new Date()
+          lastSeen: new Date(),
         }
       );
-      
-      const onlineUsers = await OnlineUser.find({ 
-        status: 'online'
+
+      const onlineUsers = await OnlineUser.find({
+        status: 'online',
       }).select('userId username status lastSeen');
-      
-      logger.info(`Broadcasting online users list to ALL clients. Count: ${onlineUsers.length}`);
-      logger.info(`Online users: ${onlineUsers.map(u => u.username).join(', ')}`);
-      
+
+      logger.info(
+        `Broadcasting online users list to ALL clients. Count: ${onlineUsers.length}`
+      );
+      logger.info(
+        `Online users: ${onlineUsers.map((u) => u.username).join(', ')}`
+      );
+
       io.emit('online-users-list', onlineUsers);
       lastBroadcastTime = Date.now();
-      
+
       logger.info(`Broadcast complete. Sent to all connected clients.`);
     } catch (error) {
       logger.error(`Error broadcasting online users: ${error.message}`);
@@ -622,27 +678,29 @@ io.on('connection', async (socket) => {
         username: socket.username,
         socketId: socket.id,
         status: 'online',
-        lastSeen: new Date()
+        lastSeen: new Date(),
       },
       { upsert: true }
     );
 
     // Get all online users and send to new user
-    const onlineUsers = await OnlineUser.find({ 
-      status: 'online'
+    const onlineUsers = await OnlineUser.find({
+      status: 'online',
     }).select('userId username status lastSeen');
 
-    logger.info(`User ${socket.username} connected. Online users count: ${onlineUsers.length}`);
-    
+    logger.info(
+      `User ${socket.username} connected. Online users count: ${onlineUsers.length}`
+    );
+
     // Use the centralized broadcast function (with rate limiting)
     await broadcastOnlineUsers();
 
     // Join user rooms
     const userRooms = await ChatRoom.find({
-      'participants.userId': socket.userId
+      'participants.userId': socket.userId,
     });
 
-    userRooms.forEach(room => {
+    userRooms.forEach((room) => {
       socket.join(room._id.toString());
     });
 
@@ -656,14 +714,16 @@ io.on('connection', async (socket) => {
         }
 
         // Check if user is participant
-        const isParticipant = room.participants.some(p => p.userId === socket.userId);
+        const isParticipant = room.participants.some(
+          (p) => p.userId === socket.userId
+        );
         if (!isParticipant && room.type !== 'public') {
           socket.emit('error', { message: 'Not authorized to join room' });
           return;
         }
 
         socket.join(roomId);
-        
+
         // Update user's current room
         await OnlineUser.findOneAndUpdate(
           { userId: socket.userId },
@@ -674,7 +734,7 @@ io.on('connection', async (socket) => {
         socket.to(roomId).emit('user-joined-room', {
           userId: socket.userId,
           username: socket.username,
-          roomId
+          roomId,
         });
 
         logger.info(`User ${socket.username} joined room ${roomId}`);
@@ -688,7 +748,7 @@ io.on('connection', async (socket) => {
     socket.on('leave-room', async (roomId) => {
       try {
         socket.leave(roomId);
-        
+
         // Update user's current room
         await OnlineUser.findOneAndUpdate(
           { userId: socket.userId },
@@ -699,7 +759,7 @@ io.on('connection', async (socket) => {
         socket.to(roomId).emit('user-left-room', {
           userId: socket.userId,
           username: socket.username,
-          roomId
+          roomId,
         });
 
         logger.info(`User ${socket.username} left room ${roomId}`);
@@ -726,7 +786,9 @@ io.on('connection', async (socket) => {
           return;
         }
 
-        const isParticipant = room.participants.some(p => p.userId === socket.userId);
+        const isParticipant = room.participants.some(
+          (p) => p.userId === socket.userId
+        );
         if (!isParticipant && room.type !== 'public') {
           socket.emit('error', { message: 'Not authorized to send message' });
           return;
@@ -739,7 +801,7 @@ io.on('connection', async (socket) => {
           senderUsername: socket.username,
           content,
           messageType,
-          replyTo: replyTo || undefined
+          replyTo: replyTo || undefined,
         });
 
         await message.save();
@@ -759,7 +821,7 @@ io.on('connection', async (socket) => {
           content,
           messageType,
           replyTo: message.replyTo,
-          createdAt: message.createdAt
+          createdAt: message.createdAt,
         });
 
         logger.info(`Message sent by ${socket.username} in room ${roomId}`);
@@ -782,20 +844,20 @@ io.on('connection', async (socket) => {
 
         // Check if user already reacted with this emoji
         const existingReaction = message.reactions.find(
-          r => r.userId === socket.userId && r.emoji === emoji
+          (r) => r.userId === socket.userId && r.emoji === emoji
         );
 
         if (existingReaction) {
           // Remove reaction
           message.reactions = message.reactions.filter(
-            r => !(r.userId === socket.userId && r.emoji === emoji)
+            (r) => !(r.userId === socket.userId && r.emoji === emoji)
           );
         } else {
           // Add reaction
           message.reactions.push({
             userId: socket.userId,
             username: socket.username,
-            emoji
+            emoji,
           });
         }
 
@@ -804,10 +866,14 @@ io.on('connection', async (socket) => {
         // Broadcast reaction update
         io.to(message.roomId.toString()).emit('reaction-updated', {
           messageId,
-          reactions: message.reactions
+          reactions: message.reactions,
         });
 
-        logger.info(`Reaction ${emoji} ${existingReaction ? 'removed' : 'added'} by ${socket.username}`);
+        logger.info(
+          `Reaction ${emoji} ${existingReaction ? 'removed' : 'added'} by ${
+            socket.username
+          }`
+        );
       } catch (error) {
         logger.error('Add reaction error:', error);
         socket.emit('error', { message: 'Failed to add reaction' });
@@ -820,7 +886,7 @@ io.on('connection', async (socket) => {
       socket.to(roomId).emit('user-typing', {
         userId: socket.userId,
         username: socket.username,
-        isTyping
+        isTyping,
       });
     });
 
@@ -835,7 +901,7 @@ io.on('connection', async (socket) => {
         socket.broadcast.emit('user-status-changed', {
           userId: socket.userId,
           username: socket.username,
-          status
+          status,
         });
 
         logger.info(`User ${socket.username} status changed to ${status}`);
@@ -848,24 +914,25 @@ io.on('connection', async (socket) => {
     socket.on('disconnect', async () => {
       try {
         logger.info(`User ${socket.username} disconnecting...`);
-        
+
         await OnlineUser.findOneAndUpdate(
           { userId: socket.userId },
-          { 
+          {
             status: 'offline',
-            lastSeen: new Date()
+            lastSeen: new Date(),
           }
         );
 
         // Use the centralized broadcast function
         await broadcastOnlineUsers();
 
-        logger.info(`User ${socket.username} disconnected and status updated to offline`);
+        logger.info(
+          `User ${socket.username} disconnected and status updated to offline`
+        );
       } catch (error) {
         logger.error('Disconnect error:', error);
       }
     });
-
   } catch (error) {
     logger.error('Socket connection error:', error);
   }
@@ -884,8 +951,11 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 3003;
 
-server.listen(PORT, () => {
-  logger.info(`Chat Service running on port ${PORT}`);
-});
+// Only start server if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+    logger.info(`Chat Service running on port ${PORT}`);
+  });
+}
 
 module.exports = { app, server };

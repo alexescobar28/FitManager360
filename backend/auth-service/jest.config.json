@@ -1,0 +1,6 @@
+{
+  "testEnvironment": "node",
+  "collectCoverage": false,
+  "testTimeout": 10000,
+  "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"]
+}
