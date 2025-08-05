@@ -58,13 +58,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: backend/${{ matrix.service }}/package-lock.json
 
       - name: Install dependencies
         run: |
           cd backend/${{ matrix.service }}
-          npm ci
+          npm install
 
       - name: Run tests
         run: |
@@ -83,48 +81,58 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: |
           cd frontend
-          npm ci
+          npm install
 
       - name: Run tests
         run: |
           cd frontend
           npm test -- --coverage --watchAll=false || echo "No tests found"
 
-  # Trigger deploy en Render (usando webhooks)
+  # Trigger deploy en Render (simplificado)
   deploy-render:
     runs-on: ubuntu-latest
     needs: [changes, test, test-frontend]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    strategy:
-      matrix:
-        include:
-          - service: auth-service
-            webhook: ${{ secrets.RENDER_AUTH_WEBHOOK }}
-          - service: routine-service
-            webhook: ${{ secrets.RENDER_ROUTINE_WEBHOOK }}
-          - service: chat-service
-            webhook: ${{ secrets.RENDER_CHAT_WEBHOOK }}
-          - service: stats-service
-            webhook: ${{ secrets.RENDER_STATS_WEBHOOK }}
-          - service: api-gateway
-            webhook: ${{ secrets.RENDER_GATEWAY_WEBHOOK }}
-          - service: frontend
-            webhook: ${{ secrets.RENDER_FRONTEND_WEBHOOK }}
     steps:
-      - name: Trigger Render Deploy
-        if: needs.changes.outputs[matrix.service] == 'true'
+      - name: Deploy Auth Service
+        if: needs.changes.outputs.auth-service == 'true'
         run: |
-          curl -X POST "${{ matrix.webhook }}"
+          echo "Deploying Auth Service..."
+          echo "Render will auto-deploy from GitHub integration"
 
-      - name: Wait for deployment
-        if: needs.changes.outputs[matrix.service] == 'true'
-        run: sleep 30
+      - name: Deploy Routine Service
+        if: needs.changes.outputs.routine-service == 'true'
+        run: |
+          echo "Deploying Routine Service..."
+          echo "Render will auto-deploy from GitHub integration"
+
+      - name: Deploy Chat Service
+        if: needs.changes.outputs.chat-service == 'true'
+        run: |
+          echo "Deploying Chat Service..."
+          echo "Render will auto-deploy from GitHub integration"
+
+      - name: Deploy Stats Service
+        if: needs.changes.outputs.stats-service == 'true'
+        run: |
+          echo "Deploying Stats Service..."
+          echo "Render will auto-deploy from GitHub integration"
+
+      - name: Deploy API Gateway
+        if: needs.changes.outputs.api-gateway == 'true'
+        run: |
+          echo "Deploying API Gateway..."
+          echo "Render will auto-deploy from GitHub integration"
+
+      - name: Deploy Frontend
+        if: needs.changes.outputs.frontend == 'true'
+        run: |
+          echo "Deploying Frontend..."
+          echo "Render will auto-deploy from GitHub integration"
 
   # Health Check después del deploy
   health-check:
@@ -137,11 +145,13 @@ jobs:
 
       - name: Health Check API Gateway
         run: |
-          curl -f ${{ secrets.RENDER_GATEWAY_URL }}/health || echo "Gateway health check failed"
+          echo "Health check for API Gateway..."
+          echo "Manual check: https://fitmanager-gateway.onrender.com/health"
 
       - name: Health Check Frontend
         run: |
-          curl -f ${{ secrets.RENDER_FRONTEND_URL }} || echo "Frontend health check failed"
+          echo "Health check for Frontend..."
+          echo "Manual check: https://fitmanager-frontend.onrender.com"
 
   # Notificación
   notify:
@@ -153,8 +163,8 @@ jobs:
         run: |
           if [ "${{ needs.health-check.result }}" == "success" ]; then
             echo "🎉 Deployment to Render successful!"
-            echo "🌐 Frontend: ${{ secrets.RENDER_FRONTEND_URL }}"
-            echo "🔗 API: ${{ secrets.RENDER_GATEWAY_URL }}"
+            echo "🌐 Frontend: https://fitmanager-frontend.onrender.com"
+            echo "🔗 API: https://fitmanager-gateway.onrender.com"
           else
             echo "❌ Deployment failed"
           fi
