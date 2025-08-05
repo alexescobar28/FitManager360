@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Grid,
@@ -9,28 +9,18 @@ import {
   CardContent,
   LinearProgress,
   Chip,
-  IconButton,
-  Divider,
   Avatar,
   Stack,
   alpha,
 } from '@mui/material';
 import {
   FitnessCenter,
-  Timeline,
   TrendingUp,
-  EmojiEvents,
-  CalendarToday,
   Timer,
-  LocalFireDepartment,
-  MonitorWeight,
   AccessTime,
   Category,
-  Speed,
 } from '@mui/icons-material';
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -41,7 +31,6 @@ import {
   Cell,
 } from 'recharts';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Dashboard = () => {
@@ -56,26 +45,20 @@ const Dashboard = () => {
     recentRoutines: [],
   });
   const [loading, setLoading] = useState(true);
-  const [progressData, setProgressData] = useState([]);
 
   // Colores modernos para los gráficos
   const chartColors = [
-    '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', 
-    '#10b981', '#3b82f6', '#f97316', '#06b6d4'
+    '#6366f1',
+    '#8b5cf6',
+    '#ec4899',
+    '#f59e0b',
+    '#10b981',
+    '#3b82f6',
+    '#f97316',
+    '#06b6d4',
   ];
 
-  const difficultyColors = {
-    beginner: '#10b981',
-    intermediate: '#f59e0b', 
-    advanced: '#ef4444'
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
-    fetchProgressData();
-  }, []);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       const routinesResponse = await axios.get('/api/routines');
       const routines = routinesResponse.data.routines || [];
@@ -95,35 +78,39 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const processRoutineStats = (routines) => {
     const categoryStats = {};
-    routines.forEach(routine => {
+    routines.forEach((routine) => {
       const category = routine.category || 'sin_categoria';
       categoryStats[category] = (categoryStats[category] || 0) + 1;
     });
-    const byCategoryArray = Object.entries(categoryStats).map(([key, value]) => ({
-      _id: key,
-      count: value
-    }));
+    const byCategoryArray = Object.entries(categoryStats).map(
+      ([key, value]) => ({
+        _id: key,
+        count: value,
+      })
+    );
 
     const difficultyStats = {};
-    routines.forEach(routine => {
+    routines.forEach((routine) => {
       const difficulty = routine.difficulty || 'sin_dificultad';
       difficultyStats[difficulty] = (difficultyStats[difficulty] || 0) + 1;
     });
-    const byDifficultyArray = Object.entries(difficultyStats).map(([key, value]) => ({
-      _id: key,
-      count: value
-    }));
+    const byDifficultyArray = Object.entries(difficultyStats).map(
+      ([key, value]) => ({
+        _id: key,
+        count: value,
+      })
+    );
 
     const durationStats = {
-      'corta': 0,
-      'media': 0,
-      'larga': 0,
+      corta: 0,
+      media: 0,
+      larga: 0,
     };
-    routines.forEach(routine => {
+    routines.forEach((routine) => {
       const duration = routine.estimatedDuration || 0;
       if (duration <= 30) {
         durationStats['corta']++;
@@ -133,22 +120,24 @@ const Dashboard = () => {
         durationStats['larga']++;
       }
     });
-    const byDurationArray = Object.entries(durationStats).map(([key, value]) => ({
-      _id: key,
-      count: value
-    }));
+    const byDurationArray = Object.entries(durationStats).map(
+      ([key, value]) => ({
+        _id: key,
+        count: value,
+      })
+    );
 
     const recentRoutines = routines
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 5)
-      .map(routine => ({
+      .map((routine) => ({
         id: routine._id,
         name: routine.name,
         category: routine.category,
         difficulty: routine.difficulty,
         estimatedDuration: routine.estimatedDuration,
         exerciseCount: routine.exercises?.length || 0,
-        createdAt: routine.createdAt
+        createdAt: routine.createdAt,
       }));
 
     return {
@@ -164,23 +153,17 @@ const Dashboard = () => {
 
   const fetchProgressData = async () => {
     try {
-      const response = await axios.get(
-        '/api/stats/progress/weight?period=weekly&limit=12'
-      );
-      const formattedData =
-        response.data.data?.map((item) => ({
-          ...item,
-          date: new Date(item.date).toLocaleDateString('es-ES', {
-            month: 'short',
-            day: 'numeric',
-          }),
-        })) || [];
-      setProgressData(formattedData);
+      await axios.get('/api/stats/progress/weight?period=weekly&limit=12');
+      // Response data would be processed here if needed
     } catch (error) {
       console.error('Error fetching progress data:', error);
-      setProgressData([]);
     }
   };
+
+  useEffect(() => {
+    fetchDashboardData();
+    fetchProgressData();
+  }, [fetchDashboardData]);
 
   const getCategoryLabel = (category) => {
     const labels = {
@@ -233,8 +216,19 @@ const Dashboard = () => {
       }}
     >
       <CardContent sx={{ position: 'relative', zIndex: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant='h6' component='div' sx={{ fontWeight: 600 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 2,
+          }}
+        >
+          <Typography
+            variant='h6'
+            component='div'
+            sx={{ fontWeight: 600 }}
+          >
             {title}
           </Typography>
           <Avatar
@@ -255,7 +249,10 @@ const Dashboard = () => {
           {value}
         </Typography>
         {subtitle && (
-          <Typography variant='body2' sx={{ opacity: 0.9 }}>
+          <Typography
+            variant='body2'
+            sx={{ opacity: 0.9 }}
+          >
             {subtitle}
           </Typography>
         )}
@@ -276,7 +273,12 @@ const Dashboard = () => {
     </Card>
   );
 
-  const ModernChart = ({ data, title, dataKey = 'count', colors = chartColors }) => (
+  const ModernChart = ({
+    data,
+    title,
+    dataKey = 'count',
+    colors = chartColors,
+  }) => (
     <Paper
       elevation={0}
       sx={{
@@ -298,16 +300,25 @@ const Dashboard = () => {
       >
         {title}
       </Typography>
-      <ResponsiveContainer width='100%' height={280}>
-        <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray='3 3' stroke='#e2e8f0' />
-          <XAxis 
-            dataKey='_id' 
+      <ResponsiveContainer
+        width='100%'
+        height={280}
+      >
+        <BarChart
+          data={data}
+          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+        >
+          <CartesianGrid
+            strokeDasharray='3 3'
+            stroke='#e2e8f0'
+          />
+          <XAxis
+            dataKey='_id'
             tick={{ fontSize: 12 }}
             axisLine={{ stroke: '#cbd5e1' }}
           />
-          <YAxis 
-            allowDecimals={false} 
+          <YAxis
+            allowDecimals={false}
             tick={{ fontSize: 12 }}
             axisLine={{ stroke: '#cbd5e1' }}
           />
@@ -320,9 +331,15 @@ const Dashboard = () => {
               boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
             }}
           />
-          <Bar dataKey={dataKey} radius={[8, 8, 0, 0]}>
+          <Bar
+            dataKey={dataKey}
+            radius={[8, 8, 0, 0]}
+          >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+              <Cell
+                key={`cell-${index}`}
+                fill={colors[index % colors.length]}
+              />
             ))}
           </Bar>
         </BarChart>
@@ -336,7 +353,7 @@ const Dashboard = () => {
         beginner: '#10b981',
         intermediate: '#f59e0b',
         advanced: '#ef4444',
-        sin_dificultad: '#6b7280'
+        sin_dificultad: '#6b7280',
       };
       return colors[difficulty] || '#6b7280';
     };
@@ -358,8 +375,18 @@ const Dashboard = () => {
         }}
       >
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-            <Typography variant='h6' sx={{ fontWeight: 600, color: 'text.primary' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              mb: 2,
+            }}
+          >
+            <Typography
+              variant='h6'
+              sx={{ fontWeight: 600, color: 'text.primary' }}
+            >
               {routine.name}
             </Typography>
             <Chip
@@ -369,37 +396,57 @@ const Dashboard = () => {
                 bgcolor: alpha(getDifficultyColor(routine.difficulty), 0.1),
                 color: getDifficultyColor(routine.difficulty),
                 fontWeight: 600,
-                border: `1px solid ${alpha(getDifficultyColor(routine.difficulty), 0.3)}`,
+                border: `1px solid ${alpha(
+                  getDifficultyColor(routine.difficulty),
+                  0.3
+                )}`,
               }}
             />
           </Box>
-          
-          <Stack direction='row' spacing={2} sx={{ mb: 2 }}>
+
+          <Stack
+            direction='row'
+            spacing={2}
+            sx={{ mb: 2 }}
+          >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <Category sx={{ fontSize: 16, color: 'text.secondary' }} />
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+              >
                 {getCategoryLabel(routine.category)}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <AccessTime sx={{ fontSize: 16, color: 'text.secondary' }} />
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+              >
                 {routine.estimatedDuration} min
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <FitnessCenter sx={{ fontSize: 16, color: 'text.secondary' }} />
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+              >
                 {routine.exerciseCount} ejercicios
               </Typography>
             </Box>
           </Stack>
-          
-          <Typography variant='body2' color='text.secondary'>
-            Creada el {new Date(routine.createdAt).toLocaleDateString('es-ES', {
+
+          <Typography
+            variant='body2'
+            color='text.secondary'
+          >
+            Creada el{' '}
+            {new Date(routine.createdAt).toLocaleDateString('es-ES', {
               day: 'numeric',
               month: 'long',
-              year: 'numeric'
+              year: 'numeric',
             })}
           </Typography>
         </CardContent>
@@ -409,7 +456,10 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <Container maxWidth='lg' sx={{ mt: 4, mb: 4 }}>
+      <Container
+        maxWidth='lg'
+        sx={{ mt: 4, mb: 4 }}
+      >
         <Box
           sx={{
             display: 'flex',
@@ -419,7 +469,10 @@ const Dashboard = () => {
           }}
         >
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant='h6' sx={{ mb: 2, color: 'text.secondary' }}>
+            <Typography
+              variant='h6'
+              sx={{ mb: 2, color: 'text.secondary' }}
+            >
               Cargando dashboard...
             </Typography>
             <LinearProgress sx={{ width: 200, borderRadius: 2 }} />
@@ -430,10 +483,19 @@ const Dashboard = () => {
   }
 
   return (
-    <Container maxWidth='xl' sx={{ mt: 4, mb: 4 }}>
-      <Grid container spacing={4}>
+    <Container
+      maxWidth='xl'
+      sx={{ mt: 4, mb: 4 }}
+    >
+      <Grid
+        container
+        spacing={4}
+      >
         {/* Header mejorado */}
-        <Grid item xs={12}>
+        <Grid
+          item
+          xs={12}
+        >
           <Box
             sx={{
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -443,20 +505,35 @@ const Dashboard = () => {
               mb: 2,
             }}
           >
-            <Typography variant='h3' gutterBottom sx={{ fontWeight: 'bold' }}>
+            <Typography
+              variant='h3'
+              gutterBottom
+              sx={{ fontWeight: 'bold' }}
+            >
               ¡Bienvenido, {user?.profile?.firstName || user?.username}! 💪
             </Typography>
-            <Typography variant='h6' sx={{ opacity: 0.9 }}>
+            <Typography
+              variant='h6'
+              sx={{ opacity: 0.9 }}
+            >
               {user?.email}
             </Typography>
-            <Typography variant='body1' sx={{ mt: 2, opacity: 0.8 }}>
+            <Typography
+              variant='body1'
+              sx={{ mt: 2, opacity: 0.8 }}
+            >
               Aquí tienes un resumen de tu progreso y actividad reciente
             </Typography>
           </Box>
         </Grid>
 
         {/* Estadísticas principales con gradientes */}
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={3}
+        >
           <StatCard
             title='Total de Rutinas'
             value={dashboardData.totalRoutines}
@@ -465,7 +542,12 @@ const Dashboard = () => {
             subtitle='Rutinas creadas'
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={3}
+        >
           <StatCard
             title='Categorías'
             value={dashboardData.stats.byCategory.length}
@@ -474,7 +556,12 @@ const Dashboard = () => {
             subtitle='Tipos diferentes'
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={3}
+        >
           <StatCard
             title='Niveles'
             value={dashboardData.stats.byDifficulty.length}
@@ -483,7 +570,12 @@ const Dashboard = () => {
             subtitle='Dificultades'
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={3}
+        >
           <StatCard
             title='Duraciones'
             value={dashboardData.stats.byDuration.length}
@@ -494,32 +586,44 @@ const Dashboard = () => {
         </Grid>
 
         {/* Gráficos mejorados */}
-        <Grid item xs={12} lg={6}>
+        <Grid
+          item
+          xs={12}
+          lg={6}
+        >
           <ModernChart
-            data={dashboardData.stats.byCategory.map(item => ({
+            data={dashboardData.stats.byCategory.map((item) => ({
               ...item,
-              _id: getCategoryLabel(item._id)
+              _id: getCategoryLabel(item._id),
             }))}
             title='📊 Distribución por Categoría'
           />
         </Grid>
 
-        <Grid item xs={12} lg={6}>
+        <Grid
+          item
+          xs={12}
+          lg={6}
+        >
           <ModernChart
-            data={dashboardData.stats.byDifficulty.map(item => ({
+            data={dashboardData.stats.byDifficulty.map((item) => ({
               ...item,
-              _id: getDifficultyLabel(item._id)
+              _id: getDifficultyLabel(item._id),
             }))}
             title='🎯 Distribución por Dificultad'
             colors={['#10b981', '#f59e0b', '#ef4444']}
           />
         </Grid>
 
-        <Grid item xs={12} lg={6}>
+        <Grid
+          item
+          xs={12}
+          lg={6}
+        >
           <ModernChart
-            data={dashboardData.stats.byDuration.map(item => ({
+            data={dashboardData.stats.byDuration.map((item) => ({
               ...item,
-              _id: getDurationLabel(item._id)
+              _id: getDurationLabel(item._id),
             }))}
             title='⏱️ Distribución por Duración'
             colors={['#8b5cf6', '#06b6d4', '#f97316']}
@@ -527,7 +631,11 @@ const Dashboard = () => {
         </Grid>
 
         {/* Rutinas recientes mejoradas */}
-        <Grid item xs={12} lg={6}>
+        <Grid
+          item
+          xs={12}
+          lg={6}
+        >
           <Paper
             elevation={0}
             sx={{
@@ -549,14 +657,24 @@ const Dashboard = () => {
             <Box sx={{ maxHeight: 400, overflowY: 'auto', pr: 1 }}>
               {dashboardData.recentRoutines.length > 0 ? (
                 dashboardData.recentRoutines.map((routine) => (
-                  <RoutineCard key={routine.id} routine={routine} />
+                  <RoutineCard
+                    key={routine.id}
+                    routine={routine}
+                  />
                 ))
               ) : (
                 <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <Typography variant='body1' color='text.secondary'>
+                  <Typography
+                    variant='body1'
+                    color='text.secondary'
+                  >
                     No hay rutinas recientes
                   </Typography>
-                  <Typography variant='body2' color='text.secondary' sx={{ mt: 1 }}>
+                  <Typography
+                    variant='body2'
+                    color='text.secondary'
+                    sx={{ mt: 1 }}
+                  >
                     ¡Crea tu primera rutina para empezar!
                   </Typography>
                 </Box>

@@ -57,9 +57,28 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
 
+    const verifyStoredToken = async (token) => {
+      try {
+        const response = await axios.get('/api/auth/verify-token', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.data.valid) {
+          setUser(response.data.user);
+        } else {
+          logout();
+        }
+      } catch (error) {
+        console.error('Token verification failed:', error);
+        logout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (token && userData) {
       setUser(JSON.parse(userData));
-      verifyToken(token);
+      verifyStoredToken(token);
     } else {
       setLoading(false);
     }

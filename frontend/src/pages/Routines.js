@@ -60,7 +60,13 @@ import axios from 'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
+  return (
+    <Slide
+      direction='up'
+      ref={ref}
+      {...props}
+    />
+  );
 });
 
 const Routines = () => {
@@ -84,7 +90,6 @@ const Routines = () => {
   const [openExercisesDialog, setOpenExercisesDialog] = useState(false);
   const [exercisesToShow, setExercisesToShow] = useState([]);
   const [availableExercises, setAvailableExercises] = useState([]);
-  const [loadingExercises, setLoadingExercises] = useState(true);
   const [expandedCards, setExpandedCards] = useState({});
   const [seedingExercises, setSeedingExercises] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState({
@@ -130,18 +135,15 @@ const Routines = () => {
 
   const fetchExercises = async () => {
     try {
-      setLoadingExercises(true);
       const res = await axios.get('/api/exercises');
       const exercises = res.data.exercises || [];
       setAvailableExercises(exercises);
-      
+
       if (exercises.length === 0) {
         console.log('No exercises found, user can seed default exercises');
       }
     } catch (error) {
       console.error('Error fetching exercises:', error);
-    } finally {
-      setLoadingExercises(false);
     }
   };
 
@@ -155,8 +157,10 @@ const Routines = () => {
         difficulty: routine.difficulty,
         estimatedDuration: routine.estimatedDuration,
         exercises: (routine.exercises || []).map((ex, idx) => ({
-          exercise: typeof ex.exercise === 'object' ? ex.exercise._id : ex.exercise,
-          exerciseName: typeof ex.exercise === 'object' ? ex.exercise.name : 'Ejercicio',
+          exercise:
+            typeof ex.exercise === 'object' ? ex.exercise._id : ex.exercise,
+          exerciseName:
+            typeof ex.exercise === 'object' ? ex.exercise.name : 'Ejercicio',
           sets: (ex.sets || []).map((set) => ({
             reps: set.reps ?? '',
             weight: set.weight ?? '',
@@ -221,19 +225,21 @@ const Routines = () => {
     try {
       setCreatingExercise(true);
       setError('');
-      
+
       const exerciseToCreate = {
         ...newExerciseData,
-        instructions: newExerciseData.instructions.filter(instruction => instruction.trim() !== ''),
-        tips: newExerciseData.tips.filter(tip => tip.trim() !== ''),
+        instructions: newExerciseData.instructions.filter(
+          (instruction) => instruction.trim() !== ''
+        ),
+        tips: newExerciseData.tips.filter((tip) => tip.trim() !== ''),
       };
-      
+
       const response = await axios.post('/api/exercises', exerciseToCreate);
       const createdExercise = response.data;
-      
+
       // Update available exercises list
       await fetchExercises();
-      
+
       // Add the new exercise to the routine
       const newExerciseForRoutine = {
         exercise: createdExercise._id,
@@ -241,12 +247,12 @@ const Routines = () => {
         sets: [{ reps: '', weight: '', duration: '', rest: '' }],
         order: formData.exercises.length,
       };
-      
-      setFormData(prev => ({
+
+      setFormData((prev) => ({
         ...prev,
         exercises: [...prev.exercises, newExerciseForRoutine],
       }));
-      
+
       handleCloseNewExerciseDialog();
     } catch (error) {
       console.error('Error creating exercise:', error);
@@ -284,9 +290,13 @@ const Routines = () => {
         handleOpenNewExerciseDialog();
         return;
       }
-      const selectedExercise = availableExercises.find(ex => ex._id === value);
+      const selectedExercise = availableExercises.find(
+        (ex) => ex._id === value
+      );
       updatedExercises[exerciseIndex].exercise = value;
-      updatedExercises[exerciseIndex].exerciseName = selectedExercise ? selectedExercise.name : '';
+      updatedExercises[exerciseIndex].exerciseName = selectedExercise
+        ? selectedExercise.name
+        : '';
     } else {
       updatedExercises[exerciseIndex][field] = value;
     }
@@ -312,9 +322,9 @@ const Routines = () => {
 
   const handleRemoveSet = (exerciseIndex, setIndex) => {
     const updatedExercises = [...formData.exercises];
-    updatedExercises[exerciseIndex].sets = updatedExercises[exerciseIndex].sets.filter(
-      (_, i) => i !== setIndex
-    );
+    updatedExercises[exerciseIndex].sets = updatedExercises[
+      exerciseIndex
+    ].sets.filter((_, i) => i !== setIndex);
     setFormData({
       ...formData,
       exercises: updatedExercises,
@@ -332,22 +342,35 @@ const Routines = () => {
 
   const handleSubmit = async () => {
     const normalizedExercises = formData.exercises
-      .filter(ex => ex.exercise)
+      .filter((ex) => ex.exercise)
       .map((ex, idx) => {
         const sets = (ex.sets || [])
           .map((set) => ({
-            reps: set.reps !== '' && set.reps !== undefined ? Number(set.reps) : undefined,
-            weight: set.weight !== '' && set.weight !== undefined ? Number(set.weight) : undefined,
-            duration: set.duration !== '' && set.duration !== undefined ? Number(set.duration) : undefined,
-            rest: set.rest !== '' && set.rest !== undefined ? Number(set.rest) : undefined,
+            reps:
+              set.reps !== '' && set.reps !== undefined
+                ? Number(set.reps)
+                : undefined,
+            weight:
+              set.weight !== '' && set.weight !== undefined
+                ? Number(set.weight)
+                : undefined,
+            duration:
+              set.duration !== '' && set.duration !== undefined
+                ? Number(set.duration)
+                : undefined,
+            rest:
+              set.rest !== '' && set.rest !== undefined
+                ? Number(set.rest)
+                : undefined,
           }))
-          .filter((set) =>
-            set.reps !== undefined ||
-            set.weight !== undefined ||
-            set.duration !== undefined ||
-            set.rest !== undefined
+          .filter(
+            (set) =>
+              set.reps !== undefined ||
+              set.weight !== undefined ||
+              set.duration !== undefined ||
+              set.rest !== undefined
           );
-        
+
         return {
           exercise: ex.exercise,
           sets,
@@ -390,7 +413,7 @@ const Routines = () => {
   const handleConfirmDelete = async () => {
     if (!deleteDialog.routine) return;
 
-    setDeleteDialog(prev => ({ ...prev, loading: true }));
+    setDeleteDialog((prev) => ({ ...prev, loading: true }));
 
     try {
       await axios.delete(`/api/routines/${deleteDialog.routine._id}`);
@@ -399,7 +422,7 @@ const Routines = () => {
     } catch (error) {
       console.error('Error deleting routine:', error);
       setError('Error al eliminar la rutina');
-      setDeleteDialog(prev => ({ ...prev, loading: false }));
+      setDeleteDialog((prev) => ({ ...prev, loading: false }));
     }
   };
 
@@ -422,9 +445,9 @@ const Routines = () => {
   };
 
   const toggleCardExpansion = (routineId) => {
-    setExpandedCards(prev => ({
+    setExpandedCards((prev) => ({
       ...prev,
-      [routineId]: !prev[routineId]
+      [routineId]: !prev[routineId],
     }));
   };
 
@@ -472,11 +495,14 @@ const Routines = () => {
     return labels[difficulty] || difficulty;
   };
 
-  const filteredRoutines = routines.filter(routine => {
-    const matchesSearch = routine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredRoutines = routines.filter((routine) => {
+    const matchesSearch =
+      routine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       routine.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !filterCategory || routine.category === filterCategory;
-    const matchesDifficulty = !filterDifficulty || routine.difficulty === filterDifficulty;
+    const matchesCategory =
+      !filterCategory || routine.category === filterCategory;
+    const matchesDifficulty =
+      !filterDifficulty || routine.difficulty === filterDifficulty;
 
     return matchesSearch && matchesCategory && matchesDifficulty;
   });
@@ -498,7 +524,14 @@ const Routines = () => {
         }}
       >
         <CardContent sx={{ pb: 1 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              mb: 2.5,
+            }}
+          >
             <Typography
               variant='h6'
               component='div'
@@ -512,25 +545,28 @@ const Routines = () => {
             >
               {routine.name}
             </Typography>
-            <Stack direction="row" spacing={0.5}>
+            <Stack
+              direction='row'
+              spacing={0.5}
+            >
               <Chip
                 label={getCategoryLabel(routine.category)}
                 color={getCategoryColor(routine.category)}
                 size='small'
-                sx={{ 
+                sx={{
                   fontSize: '0.75rem',
                   fontWeight: 600,
-                  '& .MuiChip-label': { px: 1.5 }
+                  '& .MuiChip-label': { px: 1.5 },
                 }}
               />
               <Chip
                 label={getDifficultyLabel(routine.difficulty)}
                 color={getDifficultyColor(routine.difficulty)}
                 size='small'
-                sx={{ 
+                sx={{
                   fontSize: '0.75rem',
                   fontWeight: 600,
-                  '& .MuiChip-label': { px: 1.5 }
+                  '& .MuiChip-label': { px: 1.5 },
                 }}
               />
             </Stack>
@@ -553,14 +589,24 @@ const Routines = () => {
 
           <Box sx={{ display: 'flex', gap: 3, mb: 2.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <AccessTime sx={{ mr: 0.75, fontSize: 18, color: 'primary.main' }} />
-              <Typography variant='body2' sx={{ fontWeight: 500 }}>
+              <AccessTime
+                sx={{ mr: 0.75, fontSize: 18, color: 'primary.main' }}
+              />
+              <Typography
+                variant='body2'
+                sx={{ fontWeight: 500 }}
+              >
                 {routine.estimatedDuration} min
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <FitnessCenter sx={{ mr: 0.75, fontSize: 18, color: 'primary.main' }} />
-              <Typography variant='body2' sx={{ fontWeight: 500 }}>
+              <FitnessCenter
+                sx={{ mr: 0.75, fontSize: 18, color: 'primary.main' }}
+              />
+              <Typography
+                variant='body2'
+                sx={{ fontWeight: 500 }}
+              >
                 {routine.exercises?.length || 0} ejercicios
               </Typography>
             </Box>
@@ -568,17 +614,29 @@ const Routines = () => {
 
           <Collapse in={isExpanded}>
             <Divider sx={{ mb: 2.5 }} />
-            <Typography variant='subtitle2' sx={{ mb: 1.5, fontWeight: 700, color: 'primary.main' }}>
+            <Typography
+              variant='subtitle2'
+              sx={{ mb: 1.5, fontWeight: 700, color: 'primary.main' }}
+            >
               Ejercicios ({routine.exercises?.length || 0})
             </Typography>
-            <List dense sx={{ py: 0 }}>
+            <List
+              dense
+              sx={{ py: 0 }}
+            >
               {(routine.exercises || []).slice(0, 5).map((ex, idx) => {
-                const exObj = ex.exercise && typeof ex.exercise === 'object'
-                  ? ex.exercise
-                  : availableExercises.find(e => e._id === (ex.exercise?._id || ex.exercise));
+                const exObj =
+                  ex.exercise && typeof ex.exercise === 'object'
+                    ? ex.exercise
+                    : availableExercises.find(
+                        (e) => e._id === (ex.exercise?._id || ex.exercise)
+                      );
 
                 return (
-                  <ListItem key={idx} sx={{ px: 0, py: 0.75 }}>
+                  <ListItem
+                    key={idx}
+                    sx={{ px: 0, py: 0.75 }}
+                  >
                     <ListItemIcon sx={{ minWidth: 36 }}>
                       <Box
                         sx={{
@@ -591,7 +649,10 @@ const Routines = () => {
                           justifyContent: 'center',
                         }}
                       >
-                        <Typography variant="caption" sx={{ color: 'white', fontWeight: 600 }}>
+                        <Typography
+                          variant='caption'
+                          sx={{ color: 'white', fontWeight: 600 }}
+                        >
                           {idx + 1}
                         </Typography>
                       </Box>
@@ -599,13 +660,13 @@ const Routines = () => {
                     <ListItemText
                       primary={exObj ? exObj.name : `Ejercicio ${idx + 1}`}
                       secondary={`${ex.sets?.length || 0} sets`}
-                      primaryTypographyProps={{ 
+                      primaryTypographyProps={{
                         variant: 'body2',
-                        fontWeight: 500
+                        fontWeight: 500,
                       }}
-                      secondaryTypographyProps={{ 
+                      secondaryTypographyProps={{
                         variant: 'caption',
-                        color: 'text.secondary'
+                        color: 'text.secondary',
                       }}
                     />
                   </ListItem>
@@ -614,12 +675,14 @@ const Routines = () => {
               {(routine.exercises?.length || 0) > 5 && (
                 <ListItem sx={{ px: 0, py: 0.5 }}>
                   <ListItemText
-                    primary={`... y ${(routine.exercises?.length || 0) - 5} ejercicios más`}
+                    primary={`... y ${
+                      (routine.exercises?.length || 0) - 5
+                    } ejercicios más`}
                     primaryTypographyProps={{
                       variant: 'caption',
                       color: 'text.secondary',
                       fontStyle: 'italic',
-                      fontWeight: 500
+                      fontWeight: 500,
                     }}
                   />
                 </ListItem>
@@ -640,7 +703,7 @@ const Routines = () => {
                 setExercisesToShow(routine.exercises || []);
                 setOpenExercisesDialog(true);
               }}
-              sx={{ 
+              sx={{
                 fontSize: '0.8rem',
                 fontWeight: 600,
                 borderRadius: 2,
@@ -654,7 +717,7 @@ const Routines = () => {
               startIcon={isExpanded ? <ExpandLess /> : <ExpandMore />}
               variant='text'
               onClick={() => toggleCardExpansion(routine._id)}
-              sx={{ 
+              sx={{
                 fontSize: '0.8rem',
                 fontWeight: 600,
                 minWidth: 'auto',
@@ -667,7 +730,7 @@ const Routines = () => {
           </Box>
 
           <Box sx={{ display: 'flex', gap: 0.5 }}>
-            <Tooltip title="Editar rutina">
+            <Tooltip title='Editar rutina'>
               <IconButton
                 size='small'
                 onClick={() => handleOpenDialog(routine)}
@@ -679,10 +742,10 @@ const Routines = () => {
                   },
                 }}
               >
-                <Edit fontSize="small" />
+                <Edit fontSize='small' />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Eliminar rutina">
+            <Tooltip title='Eliminar rutina'>
               <IconButton
                 size='small'
                 onClick={() => handleOpenDeleteDialog(routine)}
@@ -694,7 +757,7 @@ const Routines = () => {
                   },
                 }}
               >
-                <Delete fontSize="small" />
+                <Delete fontSize='small' />
               </IconButton>
             </Tooltip>
           </Box>
@@ -706,37 +769,80 @@ const Routines = () => {
   const SkeletonCard = () => (
     <Card sx={{ border: '1px solid', borderColor: 'divider' }}>
       <CardContent>
-        <Skeleton variant="text" width="80%" height={32} />
-        <Skeleton variant="text" width="100%" height={20} sx={{ mt: 1 }} />
-        <Skeleton variant="text" width="60%" height={20} />
+        <Skeleton
+          variant='text'
+          width='80%'
+          height={32}
+        />
+        <Skeleton
+          variant='text'
+          width='100%'
+          height={20}
+          sx={{ mt: 1 }}
+        />
+        <Skeleton
+          variant='text'
+          width='60%'
+          height={20}
+        />
         <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-          <Skeleton variant="rectangular" width={80} height={24} sx={{ borderRadius: 1 }} />
-          <Skeleton variant="rectangular" width={100} height={24} sx={{ borderRadius: 1 }} />
+          <Skeleton
+            variant='rectangular'
+            width={80}
+            height={24}
+            sx={{ borderRadius: 1 }}
+          />
+          <Skeleton
+            variant='rectangular'
+            width={100}
+            height={24}
+            sx={{ borderRadius: 1 }}
+          />
         </Box>
       </CardContent>
       <CardActions>
-        <Skeleton variant="rectangular" width={100} height={32} sx={{ borderRadius: 1 }} />
-        <Skeleton variant="rectangular" width={80} height={32} sx={{ borderRadius: 1, ml: 'auto' }} />
+        <Skeleton
+          variant='rectangular'
+          width={100}
+          height={32}
+          sx={{ borderRadius: 1 }}
+        />
+        <Skeleton
+          variant='rectangular'
+          width={80}
+          height={32}
+          sx={{ borderRadius: 1, ml: 'auto' }}
+        />
       </CardActions>
     </Card>
   );
 
   return (
     <Box sx={{ backgroundColor: 'grey.50', minHeight: '100vh' }}>
-      <Container maxWidth='lg' sx={{ py: 4 }}>
+      <Container
+        maxWidth='lg'
+        sx={{ py: 4 }}
+      >
         {/* Header Section */}
-        <Paper 
+        <Paper
           elevation={0}
-          sx={{ 
-            p: 4, 
-            mb: 4, 
+          sx={{
+            p: 4,
+            mb: 4,
             backgroundColor: 'white',
             border: '1px solid',
             borderColor: 'divider',
             borderRadius: 3,
           }}
         >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 4,
+            }}
+          >
             <Box>
               <Typography
                 variant='h3'
@@ -749,7 +855,11 @@ const Routines = () => {
               >
                 Mis Rutinas
               </Typography>
-              <Typography variant='h6' color='text.secondary' sx={{ fontWeight: 400 }}>
+              <Typography
+                variant='h6'
+                color='text.secondary'
+                sx={{ fontWeight: 400 }}
+              >
                 Gestiona tus rutinas de entrenamiento personalizadas
               </Typography>
             </Box>
@@ -758,8 +868,8 @@ const Routines = () => {
               size='large'
               startIcon={<Add />}
               onClick={() => handleOpenDialog()}
-              sx={{ 
-                px: 4, 
+              sx={{
+                px: 4,
                 py: 1.5,
                 borderRadius: 3,
                 fontWeight: 600,
@@ -772,17 +882,25 @@ const Routines = () => {
 
           <Divider sx={{ mb: 4 }} />
 
-          <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} md={5}>
+          <Grid
+            container
+            spacing={3}
+            alignItems='center'
+          >
+            <Grid
+              item
+              xs={12}
+              md={5}
+            >
               <TextField
                 fullWidth
-                placeholder="Buscar rutinas..."
+                placeholder='Buscar rutinas...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 InputProps={{
                   startAdornment: (
-                    <InputAdornment position="start">
-                      <Search color="action" />
+                    <InputAdornment position='start'>
+                      <Search color='action' />
                     </InputAdornment>
                   ),
                 }}
@@ -801,65 +919,81 @@ const Routines = () => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={2.5}>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={2.5}
+            >
               <FormControl fullWidth>
                 <Select
                   value={filterCategory}
                   onChange={(e) => setFilterCategory(e.target.value)}
                   displayEmpty
                   renderValue={
-                    filterCategory !== "" ? undefined : () => "Todas Categorías"
+                    filterCategory !== '' ? undefined : () => 'Todas Categorías'
                   }
-                  sx={{ 
+                  sx={{
                     borderRadius: 3,
                     backgroundColor: 'grey.50',
                   }}
                 >
-                  <MenuItem value="">Todas Categorías</MenuItem>
-                  <MenuItem value="strength">Fuerza</MenuItem>
-                  <MenuItem value="cardio">Cardio</MenuItem>
-                  <MenuItem value="flexibility">Flexibilidad</MenuItem>
-                  <MenuItem value="sports">Deportes</MenuItem>
-                  <MenuItem value="rehabilitation">Rehabilitación</MenuItem>
-                  <MenuItem value="weight_loss">Pérdida de peso</MenuItem>
-                  <MenuItem value="muscle_gain">Ganancia muscular</MenuItem>
+                  <MenuItem value=''>Todas Categorías</MenuItem>
+                  <MenuItem value='strength'>Fuerza</MenuItem>
+                  <MenuItem value='cardio'>Cardio</MenuItem>
+                  <MenuItem value='flexibility'>Flexibilidad</MenuItem>
+                  <MenuItem value='sports'>Deportes</MenuItem>
+                  <MenuItem value='rehabilitation'>Rehabilitación</MenuItem>
+                  <MenuItem value='weight_loss'>Pérdida de peso</MenuItem>
+                  <MenuItem value='muscle_gain'>Ganancia muscular</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={2.5}>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={2.5}
+            >
               <FormControl fullWidth>
                 <Select
                   value={filterDifficulty}
                   onChange={(e) => setFilterDifficulty(e.target.value)}
                   displayEmpty
                   renderValue={
-                    filterDifficulty !== "" ? undefined : () => "Todas Dificultades"
+                    filterDifficulty !== ''
+                      ? undefined
+                      : () => 'Todas Dificultades'
                   }
-                  sx={{ 
+                  sx={{
                     borderRadius: 3,
                     backgroundColor: 'grey.50',
                   }}
                 >
-                  <MenuItem value="">Todas Dificultades</MenuItem>
-                  <MenuItem value="beginner">Principiante</MenuItem>
-                  <MenuItem value="intermediate">Intermedio</MenuItem>
-                  <MenuItem value="advanced">Avanzado</MenuItem>
+                  <MenuItem value=''>Todas Dificultades</MenuItem>
+                  <MenuItem value='beginner'>Principiante</MenuItem>
+                  <MenuItem value='intermediate'>Intermedio</MenuItem>
+                  <MenuItem value='advanced'>Avanzado</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} md={2}>
+            <Grid
+              item
+              xs={12}
+              md={2}
+            >
               <Button
                 fullWidth
-                variant="outlined"
+                variant='outlined'
                 startIcon={<FilterList />}
                 onClick={() => {
                   setSearchTerm('');
                   setFilterCategory('');
                   setFilterDifficulty('');
                 }}
-                sx={{ 
+                sx={{
                   py: 1.5,
                   borderRadius: 3,
                   fontWeight: 600,
@@ -873,12 +1007,12 @@ const Routines = () => {
 
         {/* Error Alert */}
         {error && (
-          <Alert 
-            severity="error" 
-            sx={{ 
+          <Alert
+            severity='error'
+            sx={{
               mb: 3,
               borderRadius: 2,
-            }} 
+            }}
             onClose={() => setError('')}
           >
             {error}
@@ -886,9 +1020,9 @@ const Routines = () => {
         )}
 
         {/* Content */}
-        <Paper 
+        <Paper
           elevation={0}
-          sx={{ 
+          sx={{
             backgroundColor: 'white',
             border: '1px solid',
             borderColor: 'divider',
@@ -897,24 +1031,52 @@ const Routines = () => {
           }}
         >
           <Box sx={{ p: 4 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 4,
+              }}
+            >
+              <Typography
+                variant='h5'
+                sx={{ fontWeight: 700, color: 'text.primary' }}
+              >
                 Rutinas ({filteredRoutines.length})
               </Typography>
             </Box>
 
             {loading ? (
-              <Grid container spacing={3}>
+              <Grid
+                container
+                spacing={3}
+              >
                 {[...Array(6)].map((_, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    key={index}
+                  >
                     <SkeletonCard />
                   </Grid>
                 ))}
               </Grid>
             ) : filteredRoutines.length > 0 ? (
-              <Grid container spacing={3}>
+              <Grid
+                container
+                spacing={3}
+              >
                 {filteredRoutines.map((routine) => (
-                  <Grid item xs={12} sm={6} md={4} key={routine._id}>
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    key={routine._id}
+                  >
                     <RoutineCard routine={routine} />
                   </Grid>
                 ))}
@@ -924,11 +1086,14 @@ const Routines = () => {
                 <FitnessCenter
                   sx={{ fontSize: 100, color: 'text.disabled', mb: 3 }}
                 />
-                <Typography variant='h4' gutterBottom sx={{ fontWeight: 700, color: 'text.primary' }}>
+                <Typography
+                  variant='h4'
+                  gutterBottom
+                  sx={{ fontWeight: 700, color: 'text.primary' }}
+                >
                   {searchTerm || filterCategory || filterDifficulty
                     ? 'No se encontraron rutinas'
-                    : 'No tienes rutinas creadas'
-                  }
+                    : 'No tienes rutinas creadas'}
                 </Typography>
                 <Typography
                   variant='body1'
@@ -937,8 +1102,7 @@ const Routines = () => {
                 >
                   {searchTerm || filterCategory || filterDifficulty
                     ? 'Intenta ajustar los filtros de búsqueda para encontrar lo que buscas'
-                    : 'Crea tu primera rutina personalizada para comenzar tu entrenamiento'
-                  }
+                    : 'Crea tu primera rutina personalizada para comenzar tu entrenamiento'}
                 </Typography>
                 {!searchTerm && !filterCategory && !filterDifficulty && (
                   <Button
@@ -946,8 +1110,8 @@ const Routines = () => {
                     size='large'
                     startIcon={<Add />}
                     onClick={() => handleOpenDialog()}
-                    sx={{ 
-                      px: 6, 
+                    sx={{
+                      px: 6,
                       py: 2,
                       borderRadius: 3,
                       fontWeight: 600,
@@ -966,9 +1130,9 @@ const Routines = () => {
         <Fab
           color='primary'
           aria-label='add'
-          sx={{ 
-            position: 'fixed', 
-            bottom: 32, 
+          sx={{
+            position: 'fixed',
+            bottom: 32,
             right: 32,
             boxShadow: '0 8px 25px rgba(25, 118, 210, 0.4)',
           }}
@@ -983,10 +1147,10 @@ const Routines = () => {
           onClose={handleCloseDeleteDialog}
           TransitionComponent={Transition}
           PaperProps={{
-            sx: { 
+            sx: {
               borderRadius: 3,
               maxWidth: 450,
-            }
+            },
           }}
         >
           <DialogTitle sx={{ pb: 2 }}>
@@ -1005,10 +1169,16 @@ const Routines = () => {
                 <Warning sx={{ color: 'error.main', fontSize: 24 }} />
               </Box>
               <Box>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                <Typography
+                  variant='h5'
+                  sx={{ fontWeight: 700, color: 'text.primary' }}
+                >
                   Eliminar Rutina
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant='body2'
+                  color='text.secondary'
+                >
                   Esta acción no se puede deshacer
                 </Typography>
               </Box>
@@ -1016,21 +1186,28 @@ const Routines = () => {
           </DialogTitle>
           <Divider />
           <DialogContent sx={{ pt: 3, pb: 2 }}>
-            <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.6 }}>
+            <Typography
+              variant='body1'
+              sx={{ mb: 2, lineHeight: 1.6 }}
+            >
               ¿Estás seguro de que quieres eliminar la rutina{' '}
               <strong>"{deleteDialog.routine?.name}"</strong>?
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Se perderán todos los ejercicios y configuraciones asociadas a esta rutina.
+            <Typography
+              variant='body2'
+              color='text.secondary'
+            >
+              Se perderán todos los ejercicios y configuraciones asociadas a
+              esta rutina.
             </Typography>
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 3, gap: 2 }}>
-            <Button 
+            <Button
               onClick={handleCloseDeleteDialog}
-              variant="outlined"
-              size="large"
-              sx={{ 
+              variant='outlined'
+              size='large'
+              sx={{
                 px: 3,
                 borderRadius: 2,
                 fontWeight: 600,
@@ -1041,16 +1218,25 @@ const Routines = () => {
             </Button>
             <Button
               onClick={handleConfirmDelete}
-              variant="contained"
-              color="error"
-              size="large"
-              sx={{ 
+              variant='contained'
+              color='error'
+              size='large'
+              sx={{
                 px: 3,
                 borderRadius: 2,
                 fontWeight: 600,
               }}
               disabled={deleteDialog.loading}
-              startIcon={deleteDialog.loading ? <CircularProgress size={20} color="inherit" /> : <Delete />}
+              startIcon={
+                deleteDialog.loading ? (
+                  <CircularProgress
+                    size={20}
+                    color='inherit'
+                  />
+                ) : (
+                  <Delete />
+                )
+              }
             >
               {deleteDialog.loading ? 'Eliminando...' : 'Eliminar Rutina'}
             </Button>
@@ -1064,15 +1250,24 @@ const Routines = () => {
           maxWidth='lg'
           fullWidth
           PaperProps={{
-            sx: { 
+            sx: {
               borderRadius: 3,
               maxHeight: '90vh',
-            }
+            },
           }}
         >
           <DialogTitle sx={{ pb: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Typography
+                variant='h4'
+                sx={{ fontWeight: 700, color: 'primary.main' }}
+              >
                 {selectedRoutine ? 'Editar Rutina' : 'Nueva Rutina'}
               </Typography>
               <IconButton
@@ -1090,9 +1285,15 @@ const Routines = () => {
           </DialogTitle>
           <Divider />
           <DialogContent sx={{ pt: 4 }}>
-            <Grid container spacing={4}>
+            <Grid
+              container
+              spacing={4}
+            >
               {/* Información Básica */}
-              <Grid item xs={12}>
+              <Grid
+                item
+                xs={12}
+              >
                 <Paper
                   elevation={0}
                   sx={{
@@ -1103,11 +1304,20 @@ const Routines = () => {
                     borderRadius: 2,
                   }}
                 >
-                  <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: 'primary.main' }}>
+                  <Typography
+                    variant='h5'
+                    sx={{ mb: 3, fontWeight: 700, color: 'primary.main' }}
+                  >
                     Información Básica
                   </Typography>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12}>
+                  <Grid
+                    container
+                    spacing={3}
+                  >
+                    <Grid
+                      item
+                      xs={12}
+                    >
                       <TextField
                         fullWidth
                         label='Nombre de la rutina'
@@ -1124,13 +1334,19 @@ const Routines = () => {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid
+                      item
+                      xs={12}
+                    >
                       <TextField
                         fullWidth
                         label='Descripción'
                         value={formData.description}
                         onChange={(e) =>
-                          setFormData({ ...formData, description: e.target.value })
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
                         }
                         multiline
                         rows={3}
@@ -1142,46 +1358,72 @@ const Routines = () => {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid
+                      item
+                      xs={12}
+                      sm={4}
+                    >
                       <FormControl fullWidth>
                         <InputLabel>Categoría</InputLabel>
                         <Select
                           value={formData.category}
                           onChange={(e) =>
-                            setFormData({ ...formData, category: e.target.value })
+                            setFormData({
+                              ...formData,
+                              category: e.target.value,
+                            })
                           }
-                          sx={{ 
+                          sx={{
                             borderRadius: 2,
                             backgroundColor: 'white',
                           }}
                         >
-                          <MenuItem value='' disabled>
+                          <MenuItem
+                            value=''
+                            disabled
+                          >
                             <em>Selecciona una categoría</em>
                           </MenuItem>
                           <MenuItem value='strength'>Fuerza</MenuItem>
                           <MenuItem value='cardio'>Cardio</MenuItem>
                           <MenuItem value='flexibility'>Flexibilidad</MenuItem>
                           <MenuItem value='sports'>Deportes</MenuItem>
-                          <MenuItem value='rehabilitation'>Rehabilitación</MenuItem>
-                          <MenuItem value='weight_loss'>Pérdida de peso</MenuItem>
-                          <MenuItem value='muscle_gain'>Ganancia muscular</MenuItem>
+                          <MenuItem value='rehabilitation'>
+                            Rehabilitación
+                          </MenuItem>
+                          <MenuItem value='weight_loss'>
+                            Pérdida de peso
+                          </MenuItem>
+                          <MenuItem value='muscle_gain'>
+                            Ganancia muscular
+                          </MenuItem>
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid
+                      item
+                      xs={12}
+                      sm={4}
+                    >
                       <FormControl fullWidth>
                         <InputLabel>Dificultad</InputLabel>
                         <Select
                           value={formData.difficulty}
                           onChange={(e) =>
-                            setFormData({ ...formData, difficulty: e.target.value })
+                            setFormData({
+                              ...formData,
+                              difficulty: e.target.value,
+                            })
                           }
-                          sx={{ 
+                          sx={{
                             borderRadius: 2,
                             backgroundColor: 'white',
                           }}
                         >
-                          <MenuItem value='' disabled>
+                          <MenuItem
+                            value=''
+                            disabled
+                          >
                             <em>Selecciona una dificultad</em>
                           </MenuItem>
                           <MenuItem value='beginner'>Principiante</MenuItem>
@@ -1190,7 +1432,11 @@ const Routines = () => {
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid
+                      item
+                      xs={12}
+                      sm={4}
+                    >
                       <TextField
                         fullWidth
                         label='Duración estimada (min)'
@@ -1215,7 +1461,10 @@ const Routines = () => {
               </Grid>
 
               {/* Ejercicios */}
-              <Grid item xs={12}>
+              <Grid
+                item
+                xs={12}
+              >
                 <Paper
                   elevation={0}
                   sx={{
@@ -1226,15 +1475,25 @@ const Routines = () => {
                     borderRadius: 2,
                   }}
                 >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      mb: 4,
+                    }}
+                  >
+                    <Typography
+                      variant='h5'
+                      sx={{ fontWeight: 700, color: 'success.main' }}
+                    >
                       Ejercicios ({formData.exercises.length})
                     </Typography>
                     <Button
-                      variant="contained"
+                      variant='contained'
                       startIcon={<Add />}
                       onClick={handleAddExercise}
-                      sx={{ 
+                      sx={{
                         borderRadius: 2,
                         fontWeight: 600,
                         px: 3,
@@ -1245,28 +1504,40 @@ const Routines = () => {
                   </Box>
 
                   {formData.exercises.length === 0 ? (
-                    <Paper 
-                      sx={{ 
-                        p: 6, 
-                        textAlign: 'center', 
+                    <Paper
+                      sx={{
+                        p: 6,
+                        textAlign: 'center',
                         backgroundColor: 'white',
                         border: '2px dashed',
                         borderColor: 'grey.300',
                         borderRadius: 2,
                       }}
                     >
-                      <FitnessCenter sx={{ fontSize: 64, color: 'text.disabled', mb: 3 }} />
-                      <Typography variant="h5" color="text.secondary" gutterBottom sx={{ fontWeight: 600 }}>
+                      <FitnessCenter
+                        sx={{ fontSize: 64, color: 'text.disabled', mb: 3 }}
+                      />
+                      <Typography
+                        variant='h5'
+                        color='text.secondary'
+                        gutterBottom
+                        sx={{ fontWeight: 600 }}
+                      >
                         No hay ejercicios agregados
                       </Typography>
-                      <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 400, mx: 'auto' }}>
-                        Agrega ejercicios para completar tu rutina de entrenamiento
+                      <Typography
+                        variant='body1'
+                        color='text.secondary'
+                        sx={{ mb: 4, maxWidth: 400, mx: 'auto' }}
+                      >
+                        Agrega ejercicios para completar tu rutina de
+                        entrenamiento
                       </Typography>
                       <Button
-                        variant="contained"
+                        variant='contained'
                         startIcon={<Add />}
                         onClick={handleAddExercise}
-                        size="large"
+                        size='large'
                         sx={{
                           px: 4,
                           py: 1.5,
@@ -1280,8 +1551,8 @@ const Routines = () => {
                   ) : (
                     <Stack spacing={3}>
                       {formData.exercises.map((exercise, exerciseIndex) => (
-                        <Accordion 
-                          key={exerciseIndex} 
+                        <Accordion
+                          key={exerciseIndex}
                           defaultExpanded
                           sx={{
                             backgroundColor: 'white',
@@ -1299,25 +1570,37 @@ const Routines = () => {
                             sx={{
                               backgroundColor: 'grey.50',
                               borderRadius: '12px 12px 0 0',
-                              '&:hover': { 
-                                backgroundColor: 'grey.100' 
+                              '&:hover': {
+                                backgroundColor: 'grey.100',
                               },
                             }}
                           >
-                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                              <DragIndicator sx={{ mr: 2, color: 'text.disabled' }} />
-                              <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
-                                {exercise.exerciseName || `Ejercicio ${exerciseIndex + 1}`}
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                width: '100%',
+                              }}
+                            >
+                              <DragIndicator
+                                sx={{ mr: 2, color: 'text.disabled' }}
+                              />
+                              <Typography
+                                variant='h6'
+                                sx={{ flexGrow: 1, fontWeight: 600 }}
+                              >
+                                {exercise.exerciseName ||
+                                  `Ejercicio ${exerciseIndex + 1}`}
                               </Typography>
                               <Chip
                                 label={`${exercise.sets.length} sets`}
-                                size="small"
-                                color="primary"
+                                size='small'
+                                color='primary'
                                 sx={{ mr: 2, fontWeight: 600 }}
                               />
-                              <Tooltip title="Eliminar ejercicio">
+                              <Tooltip title='Eliminar ejercicio'>
                                 <IconButton
-                                  size="small"
+                                  size='small'
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleRemoveExercise(exerciseIndex);
@@ -1336,43 +1619,79 @@ const Routines = () => {
                             </Box>
                           </AccordionSummary>
                           <AccordionDetails sx={{ pt: 4 }}>
-                            <Grid container spacing={4}>
+                            <Grid
+                              container
+                              spacing={4}
+                            >
                               {/* Selección de ejercicio */}
-                              <Grid item xs={12}>
+                              <Grid
+                                item
+                                xs={12}
+                              >
                                 {availableExercises.length > 0 ? (
                                   <FormControl fullWidth>
                                     <InputLabel>Ejercicio</InputLabel>
                                     <Select
                                       value={exercise.exercise}
                                       onChange={(e) =>
-                                        handleExerciseChange(exerciseIndex, 'exercise', e.target.value)
+                                        handleExerciseChange(
+                                          exerciseIndex,
+                                          'exercise',
+                                          e.target.value
+                                        )
                                       }
                                       sx={{ borderRadius: 2 }}
                                     >
-                                      <MenuItem value='' disabled>
+                                      <MenuItem
+                                        value=''
+                                        disabled
+                                      >
                                         <em>Selecciona un ejercicio</em>
                                       </MenuItem>
                                       {availableExercises.map((ex) => (
-                                        <MenuItem key={ex._id} value={ex._id}>
+                                        <MenuItem
+                                          key={ex._id}
+                                          value={ex._id}
+                                        >
                                           <Box>
-                                            <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                            <Typography
+                                              variant='body1'
+                                              sx={{ fontWeight: 600 }}
+                                            >
                                               {ex.name}
                                             </Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                              {ex.muscleGroups?.join(', ')} • {ex.difficulty}
+                                            <Typography
+                                              variant='caption'
+                                              color='text.secondary'
+                                            >
+                                              {ex.muscleGroups?.join(', ')} •{' '}
+                                              {ex.difficulty}
                                             </Typography>
                                           </Box>
                                         </MenuItem>
                                       ))}
                                       <Divider sx={{ my: 1 }} />
-                                      <MenuItem value="create_new">
-                                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', color: 'primary.main' }}>
+                                      <MenuItem value='create_new'>
+                                        <Box
+                                          sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            width: '100%',
+                                            color: 'primary.main',
+                                          }}
+                                        >
                                           <Create sx={{ mr: 2 }} />
                                           <Box>
-                                            <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                            <Typography
+                                              variant='body1'
+                                              sx={{ fontWeight: 600 }}
+                                            >
                                               Crear nuevo ejercicio
                                             </Typography>
-                                            <Typography variant="caption" color="text.secondary">
+                                            <Typography
+                                              variant='caption'
+                                              color='text.secondary'
+                                            >
                                               Agregar un ejercicio personalizado
                                             </Typography>
                                           </Box>
@@ -1381,29 +1700,52 @@ const Routines = () => {
                                     </Select>
                                   </FormControl>
                                 ) : (
-                                  <Paper 
-                                    sx={{ 
-                                      p: 4, 
-                                      textAlign: 'center', 
-                                      backgroundColor: 'warning.50', 
-                                      border: '2px solid', 
+                                  <Paper
+                                    sx={{
+                                      p: 4,
+                                      textAlign: 'center',
+                                      backgroundColor: 'warning.50',
+                                      border: '2px solid',
                                       borderColor: 'warning.200',
                                       borderRadius: 2,
                                     }}
                                   >
-                                    <Typography variant="h6" color="warning.main" gutterBottom sx={{ fontWeight: 600 }}>
+                                    <Typography
+                                      variant='h6'
+                                      color='warning.main'
+                                      gutterBottom
+                                      sx={{ fontWeight: 600 }}
+                                    >
                                       No hay ejercicios disponibles
                                     </Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                                      Para crear rutinas necesitas tener ejercicios en la base de datos.
+                                    <Typography
+                                      variant='body2'
+                                      color='text.secondary'
+                                      sx={{ mb: 3 }}
+                                    >
+                                      Para crear rutinas necesitas tener
+                                      ejercicios en la base de datos.
                                     </Typography>
-                                    <Stack direction="row" spacing={2} justifyContent="center">
+                                    <Stack
+                                      direction='row'
+                                      spacing={2}
+                                      justifyContent='center'
+                                    >
                                       <Button
-                                        variant="contained"
-                                        color="warning"
+                                        variant='contained'
+                                        color='warning'
                                         onClick={handleSeedExercises}
                                         disabled={seedingExercises}
-                                        startIcon={seedingExercises ? <CircularProgress size={20} color="inherit" /> : <Add />}
+                                        startIcon={
+                                          seedingExercises ? (
+                                            <CircularProgress
+                                              size={20}
+                                              color='inherit'
+                                            />
+                                          ) : (
+                                            <Add />
+                                          )
+                                        }
                                         sx={{
                                           px: 4,
                                           py: 1.5,
@@ -1411,10 +1753,12 @@ const Routines = () => {
                                           fontWeight: 600,
                                         }}
                                       >
-                                        {seedingExercises ? 'Creando ejercicios...' : 'Crear ejercicios de ejemplo'}
+                                        {seedingExercises
+                                          ? 'Creando ejercicios...'
+                                          : 'Crear ejercicios de ejemplo'}
                                       </Button>
                                       <Button
-                                        variant="outlined"
+                                        variant='outlined'
                                         startIcon={<Create />}
                                         onClick={handleOpenNewExerciseDialog}
                                         sx={{
@@ -1432,16 +1776,29 @@ const Routines = () => {
                               </Grid>
 
                               {/* Sets */}
-                              <Grid item xs={12}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                              <Grid
+                                item
+                                xs={12}
+                              >
+                                <Box
+                                  sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    mb: 3,
+                                  }}
+                                >
+                                  <Typography
+                                    variant='h6'
+                                    sx={{ fontWeight: 600 }}
+                                  >
                                     Sets ({exercise.sets.length})
                                   </Typography>
                                   <Button
-                                    size="medium"
+                                    size='medium'
                                     startIcon={<AddCircle />}
                                     onClick={() => handleAddSet(exerciseIndex)}
-                                    variant="outlined"
+                                    variant='outlined'
                                     sx={{
                                       borderRadius: 2,
                                       fontWeight: 600,
@@ -1452,23 +1809,29 @@ const Routines = () => {
                                 </Box>
 
                                 {exercise.sets.length === 0 ? (
-                                  <Paper 
-                                    sx={{ 
-                                      p: 4, 
-                                      textAlign: 'center', 
+                                  <Paper
+                                    sx={{
+                                      p: 4,
+                                      textAlign: 'center',
                                       backgroundColor: 'grey.50',
                                       border: '2px dashed',
                                       borderColor: 'grey.300',
                                       borderRadius: 2,
                                     }}
                                   >
-                                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3, fontWeight: 500 }}>
+                                    <Typography
+                                      variant='body1'
+                                      color='text.secondary'
+                                      sx={{ mb: 3, fontWeight: 500 }}
+                                    >
                                       No hay sets configurados
                                     </Typography>
                                     <Button
                                       startIcon={<AddCircle />}
-                                      onClick={() => handleAddSet(exerciseIndex)}
-                                      variant="contained"
+                                      onClick={() =>
+                                        handleAddSet(exerciseIndex)
+                                      }
+                                      variant='contained'
                                       sx={{
                                         px: 3,
                                         py: 1,
@@ -1480,17 +1843,24 @@ const Routines = () => {
                                     </Button>
                                   </Paper>
                                 ) : (
-                                  <Paper 
-                                    variant="outlined" 
-                                    sx={{ 
+                                  <Paper
+                                    variant='outlined'
+                                    sx={{
                                       borderRadius: 2,
                                       overflow: 'hidden',
                                     }}
                                   >
                                     <Box sx={{ p: 3 }}>
-                                      <Grid container spacing={2}>
+                                      <Grid
+                                        container
+                                        spacing={2}
+                                      >
                                         {exercise.sets.map((set, setIndex) => (
-                                          <Grid item xs={12} key={setIndex}>
+                                          <Grid
+                                            item
+                                            xs={12}
+                                            key={setIndex}
+                                          >
                                             <Paper
                                               sx={{
                                                 p: 3,
@@ -1500,21 +1870,36 @@ const Routines = () => {
                                                 borderRadius: 2,
                                               }}
                                             >
-                                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                                                <Chip 
-                                                  label={`Set ${setIndex + 1}`} 
-                                                  color="primary" 
+                                              <Box
+                                                sx={{
+                                                  display: 'flex',
+                                                  justifyContent:
+                                                    'space-between',
+                                                  alignItems: 'center',
+                                                  mb: 2,
+                                                }}
+                                              >
+                                                <Chip
+                                                  label={`Set ${setIndex + 1}`}
+                                                  color='primary'
                                                   sx={{ fontWeight: 600 }}
                                                 />
-                                                <Tooltip title="Eliminar set">
+                                                <Tooltip title='Eliminar set'>
                                                   <IconButton
-                                                    size="small"
-                                                    onClick={() => handleRemoveSet(exerciseIndex, setIndex)}
+                                                    size='small'
+                                                    onClick={() =>
+                                                      handleRemoveSet(
+                                                        exerciseIndex,
+                                                        setIndex
+                                                      )
+                                                    }
                                                     sx={{
                                                       color: 'error.main',
-                                                      backgroundColor: 'error.50',
+                                                      backgroundColor:
+                                                        'error.50',
                                                       '&:hover': {
-                                                        backgroundColor: 'error.100',
+                                                        backgroundColor:
+                                                          'error.100',
                                                       },
                                                     }}
                                                   >
@@ -1522,72 +1907,119 @@ const Routines = () => {
                                                   </IconButton>
                                                 </Tooltip>
                                               </Box>
-                                              <Grid container spacing={2}>
-                                                <Grid item xs={6} sm={3}>
+                                              <Grid
+                                                container
+                                                spacing={2}
+                                              >
+                                                <Grid
+                                                  item
+                                                  xs={6}
+                                                  sm={3}
+                                                >
                                                   <TextField
                                                     fullWidth
-                                                    label="Repeticiones"
-                                                    type="number"
+                                                    label='Repeticiones'
+                                                    type='number'
                                                     value={set.reps}
                                                     onChange={(e) =>
-                                                      handleSetChange(exerciseIndex, setIndex, 'reps', e.target.value)
+                                                      handleSetChange(
+                                                        exerciseIndex,
+                                                        setIndex,
+                                                        'reps',
+                                                        e.target.value
+                                                      )
                                                     }
                                                     sx={{
-                                                      '& .MuiOutlinedInput-root': {
-                                                        borderRadius: 2,
-                                                        backgroundColor: 'white',
-                                                      },
+                                                      '& .MuiOutlinedInput-root':
+                                                        {
+                                                          borderRadius: 2,
+                                                          backgroundColor:
+                                                            'white',
+                                                        },
                                                     }}
                                                   />
                                                 </Grid>
-                                                <Grid item xs={6} sm={3}>
+                                                <Grid
+                                                  item
+                                                  xs={6}
+                                                  sm={3}
+                                                >
                                                   <TextField
                                                     fullWidth
-                                                    label="Peso (kg)"
-                                                    type="number"
+                                                    label='Peso (kg)'
+                                                    type='number'
                                                     value={set.weight}
                                                     onChange={(e) =>
-                                                      handleSetChange(exerciseIndex, setIndex, 'weight', e.target.value)
+                                                      handleSetChange(
+                                                        exerciseIndex,
+                                                        setIndex,
+                                                        'weight',
+                                                        e.target.value
+                                                      )
                                                     }
                                                     sx={{
-                                                      '& .MuiOutlinedInput-root': {
-                                                        borderRadius: 2,
-                                                        backgroundColor: 'white',
-                                                      },
+                                                      '& .MuiOutlinedInput-root':
+                                                        {
+                                                          borderRadius: 2,
+                                                          backgroundColor:
+                                                            'white',
+                                                        },
                                                     }}
                                                   />
                                                 </Grid>
-                                                <Grid item xs={6} sm={3}>
+                                                <Grid
+                                                  item
+                                                  xs={6}
+                                                  sm={3}
+                                                >
                                                   <TextField
                                                     fullWidth
-                                                    label="Duración (seg)"
-                                                    type="number"
+                                                    label='Duración (seg)'
+                                                    type='number'
                                                     value={set.duration}
                                                     onChange={(e) =>
-                                                      handleSetChange(exerciseIndex, setIndex, 'duration', e.target.value)
+                                                      handleSetChange(
+                                                        exerciseIndex,
+                                                        setIndex,
+                                                        'duration',
+                                                        e.target.value
+                                                      )
                                                     }
                                                     sx={{
-                                                      '& .MuiOutlinedInput-root': {
-                                                        borderRadius: 2,
-                                                        backgroundColor: 'white',
-                                                      },
+                                                      '& .MuiOutlinedInput-root':
+                                                        {
+                                                          borderRadius: 2,
+                                                          backgroundColor:
+                                                            'white',
+                                                        },
                                                     }}
                                                   />
                                                 </Grid>
-                                                <Grid item xs={6} sm={3}>
+                                                <Grid
+                                                  item
+                                                  xs={6}
+                                                  sm={3}
+                                                >
                                                   <TextField
                                                     fullWidth
-                                                    label="Descanso (seg)"
-                                                    type="number"
+                                                    label='Descanso (seg)'
+                                                    type='number'
                                                     value={set.rest}
                                                     onChange={(e) =>
-                                                      handleSetChange(exerciseIndex, setIndex, 'rest', e.target.value)
+                                                      handleSetChange(
+                                                        exerciseIndex,
+                                                        setIndex,
+                                                        'rest',
+                                                        e.target.value
+                                                      )
                                                     }
                                                     sx={{
-                                                      '& .MuiOutlinedInput-root': {
-                                                        borderRadius: 2,
-                                                        backgroundColor: 'white',
-                                                      },
+                                                      '& .MuiOutlinedInput-root':
+                                                        {
+                                                          borderRadius: 2,
+                                                          backgroundColor:
+                                                            'white',
+                                                        },
                                                     }}
                                                   />
                                                 </Grid>
@@ -1612,10 +2044,10 @@ const Routines = () => {
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 4, gap: 2 }}>
-            <Button 
-              onClick={handleCloseDialog} 
-              size="large" 
-              variant="outlined"
+            <Button
+              onClick={handleCloseDialog}
+              size='large'
+              variant='outlined'
               sx={{
                 px: 4,
                 py: 1.5,
@@ -1628,8 +2060,8 @@ const Routines = () => {
             <Button
               onClick={handleSubmit}
               variant='contained'
-              size="large"
-              sx={{ 
+              size='large'
+              sx={{
                 px: 6,
                 py: 1.5,
                 borderRadius: 2,
@@ -1650,11 +2082,17 @@ const Routines = () => {
           fullWidth
           TransitionComponent={Transition}
           PaperProps={{
-            sx: { borderRadius: 3 }
+            sx: { borderRadius: 3 },
           }}
         >
           <DialogTitle sx={{ pb: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Box
                   sx={{
@@ -1670,10 +2108,16 @@ const Routines = () => {
                   <Create sx={{ color: 'success.main', fontSize: 24 }} />
                 </Box>
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.main' }}>
+                  <Typography
+                    variant='h4'
+                    sx={{ fontWeight: 700, color: 'success.main' }}
+                  >
                     Nuevo Ejercicio
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant='body2'
+                    color='text.secondary'
+                  >
                     Crear un ejercicio personalizado para tu rutina
                   </Typography>
                 </Box>
@@ -1704,17 +2148,29 @@ const Routines = () => {
                 mb: 4,
               }}
             >
-              <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: 'success.main' }}>
+              <Typography
+                variant='h6'
+                sx={{ mb: 3, fontWeight: 700, color: 'success.main' }}
+              >
                 Información Básica
               </Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
+              <Grid
+                container
+                spacing={3}
+              >
+                <Grid
+                  item
+                  xs={12}
+                >
                   <TextField
                     label='Nombre del ejercicio'
                     fullWidth
                     value={newExerciseData.name}
                     onChange={(e) =>
-                      setNewExerciseData({ ...newExerciseData, name: e.target.value })
+                      setNewExerciseData({
+                        ...newExerciseData,
+                        name: e.target.value,
+                      })
                     }
                     required
                     sx={{
@@ -1725,7 +2181,10 @@ const Routines = () => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid
+                  item
+                  xs={12}
+                >
                   <TextField
                     label='Descripción'
                     fullWidth
@@ -1746,7 +2205,11 @@ const Routines = () => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                >
                   <FormControl fullWidth>
                     <InputLabel>Grupos musculares</InputLabel>
                     <Select
@@ -1759,18 +2222,27 @@ const Routines = () => {
                         })
                       }
                       renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        <Box
+                          sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}
+                        >
                           {selected.map((value) => (
-                            <Chip key={value} label={value} size="small" />
+                            <Chip
+                              key={value}
+                              label={value}
+                              size='small'
+                            />
                           ))}
                         </Box>
                       )}
-                      sx={{ 
+                      sx={{
                         borderRadius: 2,
                         backgroundColor: 'white',
                       }}
                     >
-                      <MenuItem value='' disabled>
+                      <MenuItem
+                        value=''
+                        disabled
+                      >
                         <em>Selecciona grupos musculares</em>
                       </MenuItem>
                       <MenuItem value='chest'>Pecho</MenuItem>
@@ -1783,7 +2255,11 @@ const Routines = () => {
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                >
                   <FormControl fullWidth>
                     <InputLabel>Equipo</InputLabel>
                     <Select
@@ -1796,18 +2272,27 @@ const Routines = () => {
                         })
                       }
                       renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        <Box
+                          sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}
+                        >
                           {selected.map((value) => (
-                            <Chip key={value} label={value} size="small" />
+                            <Chip
+                              key={value}
+                              label={value}
+                              size='small'
+                            />
                           ))}
                         </Box>
                       )}
-                      sx={{ 
+                      sx={{
                         borderRadius: 2,
                         backgroundColor: 'white',
                       }}
                     >
-                      <MenuItem value='' disabled>
+                      <MenuItem
+                        value=''
+                        disabled
+                      >
                         <em>Selecciona el equipo</em>
                       </MenuItem>
                       <MenuItem value='bodyweight'>Peso corporal</MenuItem>
@@ -1815,12 +2300,17 @@ const Routines = () => {
                       <MenuItem value='barbell'>Barra</MenuItem>
                       <MenuItem value='machine'>Máquina</MenuItem>
                       <MenuItem value='cable'>Cable</MenuItem>
-                      <MenuItem value='resistance_band'>Banda de resistencia</MenuItem>
+                      <MenuItem value='resistance_band'>
+                        Banda de resistencia
+                      </MenuItem>
                       <MenuItem value='kettlebell'>Kettlebell</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid
+                  item
+                  xs={12}
+                >
                   <FormControl fullWidth>
                     <InputLabel>Dificultad</InputLabel>
                     <Select
@@ -1831,12 +2321,15 @@ const Routines = () => {
                           difficulty: e.target.value,
                         })
                       }
-                      sx={{ 
+                      sx={{
                         borderRadius: 2,
                         backgroundColor: 'white',
                       }}
                     >
-                      <MenuItem value='' disabled>
+                      <MenuItem
+                        value=''
+                        disabled
+                      >
                         <em>Selecciona la dificultad</em>
                       </MenuItem>
                       <MenuItem value='beginner'>Principiante</MenuItem>
@@ -1858,11 +2351,20 @@ const Routines = () => {
                 borderRadius: 2,
               }}
             >
-              <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: 'info.main' }}>
+              <Typography
+                variant='h6'
+                sx={{ mb: 3, fontWeight: 700, color: 'info.main' }}
+              >
                 Instrucciones y Consejos
               </Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
+              <Grid
+                container
+                spacing={3}
+              >
+                <Grid
+                  item
+                  xs={12}
+                >
                   <TextField
                     label='Instrucciones (separadas por coma)'
                     fullWidth
@@ -1870,10 +2372,13 @@ const Routines = () => {
                     onChange={(e) =>
                       setNewExerciseData({
                         ...newExerciseData,
-                        instructions: e.target.value.split(',').map((i) => i.trim()).filter(i => i !== ''),
+                        instructions: e.target.value
+                          .split(',')
+                          .map((i) => i.trim())
+                          .filter((i) => i !== ''),
                       })
                     }
-                    placeholder="Ej: Mantén la espalda recta, Controla el movimiento, Respira adecuadamente"
+                    placeholder='Ej: Mantén la espalda recta, Controla el movimiento, Respira adecuadamente'
                     multiline
                     rows={2}
                     sx={{
@@ -1884,7 +2389,10 @@ const Routines = () => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid
+                  item
+                  xs={12}
+                >
                   <TextField
                     label='Consejos (separados por coma)'
                     fullWidth
@@ -1892,10 +2400,13 @@ const Routines = () => {
                     onChange={(e) =>
                       setNewExerciseData({
                         ...newExerciseData,
-                        tips: e.target.value.split(',').map((i) => i.trim()).filter(i => i !== ''),
+                        tips: e.target.value
+                          .split(',')
+                          .map((i) => i.trim())
+                          .filter((i) => i !== ''),
                       })
                     }
-                    placeholder="Ej: Calienta antes de comenzar, Aumenta peso gradualmente, Descansa entre series"
+                    placeholder='Ej: Calienta antes de comenzar, Aumenta peso gradualmente, Descansa entre series'
                     multiline
                     rows={2}
                     sx={{
@@ -1911,10 +2422,10 @@ const Routines = () => {
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 4, gap: 2 }}>
-            <Button 
+            <Button
               onClick={handleCloseNewExerciseDialog}
-              variant="outlined"
-              size="large"
+              variant='outlined'
+              size='large'
               sx={{
                 px: 4,
                 py: 1.5,
@@ -1928,18 +2439,29 @@ const Routines = () => {
             <Button
               onClick={handleCreateNewExercise}
               variant='contained'
-              color="success"
-              size="large"
-              sx={{ 
+              color='success'
+              size='large'
+              sx={{
                 px: 6,
                 py: 1.5,
                 borderRadius: 2,
                 fontWeight: 600,
               }}
               disabled={!newExerciseData.name.trim() || creatingExercise}
-              startIcon={creatingExercise ? <CircularProgress size={20} color="inherit" /> : <Create />}
+              startIcon={
+                creatingExercise ? (
+                  <CircularProgress
+                    size={20}
+                    color='inherit'
+                  />
+                ) : (
+                  <Create />
+                )
+              }
             >
-              {creatingExercise ? 'Creando Ejercicio...' : 'Crear y Agregar Ejercicio'}
+              {creatingExercise
+                ? 'Creando Ejercicio...'
+                : 'Crear y Agregar Ejercicio'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -1951,12 +2473,21 @@ const Routines = () => {
           maxWidth='md'
           fullWidth
           PaperProps={{
-            sx: { borderRadius: 3 }
+            sx: { borderRadius: 3 },
           }}
         >
           <DialogTitle sx={{ pb: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Typography
+                variant='h4'
+                sx={{ fontWeight: 700, color: 'primary.main' }}
+              >
                 Detalles de Ejercicios
               </Typography>
               <IconButton
@@ -1977,9 +2508,12 @@ const Routines = () => {
             {exercisesToShow && exercisesToShow.length > 0 ? (
               <Stack spacing={4}>
                 {exercisesToShow.map((ex, idx) => {
-                  const exObj = ex.exercise && typeof ex.exercise === 'object'
-                    ? ex.exercise
-                    : availableExercises.find(e => e._id === (ex.exercise?._id || ex.exercise));
+                  const exObj =
+                    ex.exercise && typeof ex.exercise === 'object'
+                      ? ex.exercise
+                      : availableExercises.find(
+                          (e) => e._id === (ex.exercise?._id || ex.exercise)
+                        );
 
                   return (
                     <Paper
@@ -1993,7 +2527,9 @@ const Routines = () => {
                         backgroundColor: 'grey.50',
                       }}
                     >
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', mb: 3 }}
+                      >
                         <Box
                           sx={{
                             width: 48,
@@ -2006,11 +2542,17 @@ const Routines = () => {
                             mr: 3,
                           }}
                         >
-                          <Typography variant="h6" sx={{ color: 'white', fontWeight: 700 }}>
+                          <Typography
+                            variant='h6'
+                            sx={{ color: 'white', fontWeight: 700 }}
+                          >
                             {idx + 1}
                           </Typography>
                         </Box>
-                        <Typography variant='h5' sx={{ fontWeight: 700, color: 'text.primary' }}>
+                        <Typography
+                          variant='h5'
+                          sx={{ fontWeight: 700, color: 'text.primary' }}
+                        >
                           {exObj ? exObj.name : `Ejercicio ${idx + 1}`}
                         </Typography>
                       </Box>
@@ -2028,12 +2570,28 @@ const Routines = () => {
                       {ex.sets && ex.sets.length > 0 && (
                         <>
                           <Divider sx={{ mb: 3 }} />
-                          <Typography variant='h6' sx={{ mb: 2, fontWeight: 700, color: 'success.main' }}>
+                          <Typography
+                            variant='h6'
+                            sx={{
+                              mb: 2,
+                              fontWeight: 700,
+                              color: 'success.main',
+                            }}
+                          >
                             Sets ({ex.sets.length})
                           </Typography>
-                          <Grid container spacing={2}>
+                          <Grid
+                            container
+                            spacing={2}
+                          >
                             {ex.sets.map((set, sidx) => (
-                              <Grid item xs={12} sm={6} md={4} key={sidx}>
+                              <Grid
+                                item
+                                xs={12}
+                                sm={6}
+                                md={4}
+                                key={sidx}
+                              >
                                 <Paper
                                   sx={{
                                     p: 3,
@@ -2043,25 +2601,89 @@ const Routines = () => {
                                     borderRadius: 2,
                                   }}
                                 >
-                                  <Typography variant='subtitle1' color='primary.main' sx={{ fontWeight: 700, mb: 2 }}>
+                                  <Typography
+                                    variant='subtitle1'
+                                    color='primary.main'
+                                    sx={{ fontWeight: 700, mb: 2 }}
+                                  >
                                     Set {sidx + 1}
                                   </Typography>
                                   <Stack spacing={1}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                      <Typography variant='body2' color="text.secondary">Reps:</Typography>
-                                      <Typography variant='body2' sx={{ fontWeight: 600 }}>{set.reps || 0}</Typography>
+                                    <Box
+                                      sx={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                      }}
+                                    >
+                                      <Typography
+                                        variant='body2'
+                                        color='text.secondary'
+                                      >
+                                        Reps:
+                                      </Typography>
+                                      <Typography
+                                        variant='body2'
+                                        sx={{ fontWeight: 600 }}
+                                      >
+                                        {set.reps || 0}
+                                      </Typography>
                                     </Box>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                      <Typography variant='body2' color="text.secondary">Peso:</Typography>
-                                      <Typography variant='body2' sx={{ fontWeight: 600 }}>{set.weight || 0} kg</Typography>
+                                    <Box
+                                      sx={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                      }}
+                                    >
+                                      <Typography
+                                        variant='body2'
+                                        color='text.secondary'
+                                      >
+                                        Peso:
+                                      </Typography>
+                                      <Typography
+                                        variant='body2'
+                                        sx={{ fontWeight: 600 }}
+                                      >
+                                        {set.weight || 0} kg
+                                      </Typography>
                                     </Box>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                      <Typography variant='body2' color="text.secondary">Duración:</Typography>
-                                      <Typography variant='body2' sx={{ fontWeight: 600 }}>{set.duration || 0} seg</Typography>
+                                    <Box
+                                      sx={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                      }}
+                                    >
+                                      <Typography
+                                        variant='body2'
+                                        color='text.secondary'
+                                      >
+                                        Duración:
+                                      </Typography>
+                                      <Typography
+                                        variant='body2'
+                                        sx={{ fontWeight: 600 }}
+                                      >
+                                        {set.duration || 0} seg
+                                      </Typography>
                                     </Box>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                      <Typography variant='body2' color="text.secondary">Descanso:</Typography>
-                                      <Typography variant='body2' sx={{ fontWeight: 600 }}>{set.rest || 0} seg</Typography>
+                                    <Box
+                                      sx={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                      }}
+                                    >
+                                      <Typography
+                                        variant='body2'
+                                        color='text.secondary'
+                                      >
+                                        Descanso:
+                                      </Typography>
+                                      <Typography
+                                        variant='body2'
+                                        sx={{ fontWeight: 600 }}
+                                      >
+                                        {set.rest || 0} seg
+                                      </Typography>
                                     </Box>
                                   </Stack>
                                 </Paper>
@@ -2076,8 +2698,14 @@ const Routines = () => {
               </Stack>
             ) : (
               <Box sx={{ textAlign: 'center', py: 8 }}>
-                <FitnessCenter sx={{ fontSize: 80, color: 'text.disabled', mb: 3 }} />
-                <Typography variant='h5' color='text.secondary' sx={{ fontWeight: 600 }}>
+                <FitnessCenter
+                  sx={{ fontSize: 80, color: 'text.disabled', mb: 3 }}
+                />
+                <Typography
+                  variant='h5'
+                  color='text.secondary'
+                  sx={{ fontWeight: 600 }}
+                >
                   No hay ejercicios en esta rutina
                 </Typography>
               </Box>

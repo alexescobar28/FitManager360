@@ -6,15 +6,9 @@ import {
   Card,
   CardContent,
   Typography,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
   Avatar,
   TextField,
-  Button,
   Paper,
-  Divider,
   Badge,
   Chip,
   IconButton,
@@ -27,7 +21,6 @@ import {
 } from '@mui/material';
 import {
   Send,
-  Circle,
   Search,
   EmojiEmotions,
   AttachFile,
@@ -51,11 +44,7 @@ const Chat = () => {
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
-  const {
-    socket,
-    messages: contextMessages,
-    onlineUsers: contextOnlineUsers,
-  } = useSocket();
+  const { socket, onlineUsers: contextOnlineUsers } = useSocket();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

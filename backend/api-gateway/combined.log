@@ -1,0 +1,13 @@
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:29:35 +0000] \"GET /health HTTP/1.1\" 200 92 \"-\" \"-\"","timestamp":"2025-08-05T06:29:35.859Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:29:35 +0000] \"GET / HTTP/1.1\" 200 160 \"-\" \"-\"","timestamp":"2025-08-05T06:29:35.904Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:29:35 +0000] \"GET /metrics HTTP/1.1\" 200 - \"-\" \"-\"","timestamp":"2025-08-05T06:29:35.949Z"}
+{"level":"warn","message":"404 - Route not found: GET /unknown-route","timestamp":"2025-08-05T06:29:36.002Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:29:36 +0000] \"GET /unknown-route HTTP/1.1\" 404 27 \"-\" \"-\"","timestamp":"2025-08-05T06:29:36.032Z"}
+{"level":"info","message":"auth service request: GET http://localhost:3001/","timestamp":"2025-08-05T06:29:36.077Z"}
+{"level":"info","message":"[DEBUG] req.originalUrl: /api/auth","timestamp":"2025-08-05T06:29:36.089Z"}
+{"level":"info","message":"[DEBUG] req.url: /api/auth","timestamp":"2025-08-05T06:29:36.098Z"}
+{"level":"info","message":"[DEBUG] targetPath: /","timestamp":"2025-08-05T06:29:36.103Z"}
+{"level":"info","message":"[DEBUG] url final: http://localhost:3001/","timestamp":"2025-08-05T06:29:36.112Z"}
+{"level":"info","message":"[DEBUG] cleanHeaders: {\"Content-Type\":\"application/json\",\"User-Agent\":\"API Gateway\",\"Accept\":\"application/json\"}","timestamp":"2025-08-05T06:29:36.120Z"}
+{"level":"error","message":"auth service error:","timestamp":"2025-08-05T06:29:36.414Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:29:36 +0000] \"GET /api/auth HTTP/1.1\" 404 27 \"-\" \"-\"","timestamp":"2025-08-05T06:29:36.424Z"}

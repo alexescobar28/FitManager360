@@ -1,0 +1,7 @@
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:31:10 +0000] \"GET /health HTTP/1.1\" 200 40 \"-\" \"-\"","timestamp":"2025-08-05T06:31:10.026Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-08-05T06:31:10.050Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:31:10 +0000] \"GET /metrics HTTP/1.1\" 200 - \"-\" \"-\"","timestamp":"2025-08-05T06:31:10.188Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:31:10 +0000] \"GET /rooms HTTP/1.1\" 401 33 \"-\" \"-\"","timestamp":"2025-08-05T06:31:10.243Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:31:10 +0000] \"GET /conversations HTTP/1.1\" 401 33 \"-\" \"-\"","timestamp":"2025-08-05T06:31:10.276Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:31:10 +0000] \"POST /rooms HTTP/1.1\" 401 33 \"-\" \"-\"","timestamp":"2025-08-05T06:31:10.494Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:31:10 +0000] \"POST /rooms HTTP/1.1\" 403 25 \"-\" \"-\"","timestamp":"2025-08-05T06:31:10.523Z"}

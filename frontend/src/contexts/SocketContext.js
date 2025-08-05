@@ -35,7 +35,7 @@ export const SocketProvider = ({ children }) => {
   const throttledUpdateOnlineUsers = (usersList) => {
     const now = Date.now();
     const timeSinceLastUpdate = now - lastOnlineUsersUpdate;
-    
+
     if (timeSinceLastUpdate >= ONLINE_USERS_UPDATE_THROTTLE) {
       console.log('Updating online users:', usersList.length);
       setOnlineUsers(usersList);
@@ -49,25 +49,32 @@ export const SocketProvider = ({ children }) => {
     if (user) {
       const now = Date.now();
       const timeSinceLastConnect = now - lastConnectTime;
-      
+
       // Rate limiting: prevent too many connection attempts
-      if (timeSinceLastConnect < CONNECTION_COOLDOWN && connectionAttempts >= MAX_CONNECTION_ATTEMPTS) {
+      if (
+        timeSinceLastConnect < CONNECTION_COOLDOWN &&
+        connectionAttempts >= MAX_CONNECTION_ATTEMPTS
+      ) {
         console.log('Rate limited: Too many connection attempts. Waiting...');
         const timeout = setTimeout(() => {
           setConnectionAttempts(0);
         }, CONNECTION_COOLDOWN);
         return () => clearTimeout(timeout);
       }
-      
+
       const token = localStorage.getItem('token');
-      const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:3003';
-      
-      console.log('Attempting to connect to socket with token:', token ? 'Token present' : 'No token');
+      const SOCKET_URL =
+        process.env.REACT_APP_SOCKET_URL || 'http://localhost:3003';
+
+      console.log(
+        'Attempting to connect to socket with token:',
+        token ? 'Token present' : 'No token'
+      );
       console.log('Socket URL:', SOCKET_URL);
-      
+
       setLastConnectTime(now);
-      setConnectionAttempts(prev => prev + 1);
-      
+      setConnectionAttempts((prev) => prev + 1);
+
       const newSocket = io(SOCKET_URL, {
         auth: { token },
         autoConnect: true,
@@ -75,7 +82,7 @@ export const SocketProvider = ({ children }) => {
         reconnection: true,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
-        maxReconnectionAttempts: 3
+        maxReconnectionAttempts: 3,
       });
 
       newSocket.on('connect', () => {
@@ -97,7 +104,10 @@ export const SocketProvider = ({ children }) => {
       // User status events
       newSocket.on('online-users-list', (usersList) => {
         console.log('Received online-users-list:', usersList);
-        console.log('Online users:', usersList.map(u => u.username).join(', '));
+        console.log(
+          'Online users:',
+          usersList.map((u) => u.username).join(', ')
+        );
         throttledUpdateOnlineUsers(usersList);
       });
 
@@ -112,13 +122,13 @@ export const SocketProvider = ({ children }) => {
 
       // Message events
       newSocket.on('new-message', (messageData) => {
-        setMessages(prev => [...prev, messageData]);
+        setMessages((prev) => [...prev, messageData]);
       });
 
       newSocket.on('reaction-updated', (data) => {
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === data.messageId 
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === data.messageId
               ? { ...msg, reactions: data.reactions }
               : msg
           )
@@ -127,7 +137,9 @@ export const SocketProvider = ({ children }) => {
 
       // Typing events
       newSocket.on('user-typing', (data) => {
-        console.log(`${data.username} is ${data.isTyping ? 'typing' : 'not typing'}`);
+        console.log(
+          `${data.username} is ${data.isTyping ? 'typing' : 'not typing'}`
+        );
       });
 
       // Error events
@@ -141,7 +153,7 @@ export const SocketProvider = ({ children }) => {
         newSocket.disconnect();
       };
     }
-  }, [user]);
+  }, [user, connectionAttempts, lastConnectTime, throttledUpdateOnlineUsers]);
 
   const joinRoom = (roomId) => {
     if (socket && connected) {
@@ -159,13 +171,18 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
-  const sendMessage = (roomId, content, messageType = 'text', replyTo = null) => {
+  const sendMessage = (
+    roomId,
+    content,
+    messageType = 'text',
+    replyTo = null
+  ) => {
     if (socket && connected) {
       socket.emit('send-message', {
         roomId,
         content,
         messageType,
-        replyTo
+        replyTo,
       });
     }
   };
@@ -200,12 +217,10 @@ export const SocketProvider = ({ children }) => {
     addReaction,
     setTyping,
     updateStatus,
-    setMessages
+    setMessages,
   };
 
   return (
-    <SocketContext.Provider value={value}>
-      {children}
-    </SocketContext.Provider>
+    <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
   );
 };

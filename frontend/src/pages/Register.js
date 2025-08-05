@@ -24,11 +24,10 @@ import {
   Step,
   Stepper,
   StepLabel,
-  StepContent,
 } from '@mui/material';
-import { 
-  PersonAdd, 
-  FitnessCenter, 
+import {
+  PersonAdd,
+  FitnessCenter,
   Person,
   Email,
   Lock,
@@ -75,13 +74,13 @@ const Register = () => {
     {
       label: 'Información de Cuenta',
       description: 'Datos básicos para crear tu cuenta',
-      icon: <AccountCircle />
+      icon: <AccountCircle />,
     },
     {
       label: 'Información Personal',
       description: 'Datos opcionales para personalizar tu experiencia',
-      icon: <PersonalVideo />
-    }
+      icon: <PersonalVideo />,
+    },
   ];
 
   const handleChange = (e) => {
@@ -114,7 +113,12 @@ const Register = () => {
 
   const validateStep = (step) => {
     if (step === 0) {
-      return formData.username && formData.email && formData.password && formData.confirmPassword;
+      return (
+        formData.username &&
+        formData.email &&
+        formData.password &&
+        formData.confirmPassword
+      );
     }
     return true;
   };
@@ -199,12 +203,19 @@ const Register = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+        background:
+          'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
         py: 4,
       }}
     >
-      <Container component='main' maxWidth='lg'>
-        <Fade in={true} timeout={800}>
+      <Container
+        component='main'
+        maxWidth='lg'
+      >
+        <Fade
+          in={true}
+          timeout={800}
+        >
           <Box
             sx={{
               display: 'flex',
@@ -213,7 +224,11 @@ const Register = () => {
             }}
           >
             {/* Header Card */}
-            <Slide direction="down" in={true} timeout={600}>
+            <Slide
+              direction='down'
+              in={true}
+              timeout={600}
+            >
               <Card
                 elevation={8}
                 sx={{
@@ -235,7 +250,8 @@ const Register = () => {
                       width: 80,
                       height: 80,
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background:
+                        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                       mb: 2,
                       boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
                     }}
@@ -247,7 +263,8 @@ const Register = () => {
                     variant='h3'
                     sx={{
                       fontWeight: 700,
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background:
+                        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                       backgroundClip: 'text',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
@@ -263,10 +280,13 @@ const Register = () => {
                   >
                     Comienza tu transformación hoy
                   </Typography>
-                  
+
                   {/* Progress Stepper */}
                   <Box sx={{ maxWidth: 400, mx: 'auto' }}>
-                    <Stepper activeStep={activeStep} alternativeLabel>
+                    <Stepper
+                      activeStep={activeStep}
+                      alternativeLabel
+                    >
                       {steps.map((step, index) => (
                         <Step key={step.label}>
                           <StepLabel
@@ -279,16 +299,25 @@ const Register = () => {
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
-                                  backgroundColor: active || completed ? 'primary.main' : 'grey.300',
-                                  color: active || completed ? 'white' : 'grey.600',
+                                  backgroundColor:
+                                    active || completed
+                                      ? 'primary.main'
+                                      : 'grey.300',
+                                  color:
+                                    active || completed ? 'white' : 'grey.600',
                                   transition: 'all 0.3s ease',
                                 }}
                               >
-                                {React.cloneElement(step.icon, { fontSize: 'small' })}
+                                {React.cloneElement(step.icon, {
+                                  fontSize: 'small',
+                                })}
                               </Box>
                             )}
                           >
-                            <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                            <Typography
+                              variant='caption'
+                              sx={{ fontWeight: 600 }}
+                            >
                               {step.label}
                             </Typography>
                           </StepLabel>
@@ -301,7 +330,11 @@ const Register = () => {
             </Slide>
 
             {/* Main Form Card */}
-            <Slide direction="up" in={true} timeout={800}>
+            <Slide
+              direction='up'
+              in={true}
+              timeout={800}
+            >
               <Paper
                 elevation={12}
                 sx={{
@@ -322,8 +355,8 @@ const Register = () => {
                     <Fade in={true}>
                       <Alert
                         severity='error'
-                        sx={{ 
-                          mb: 3, 
+                        sx={{
+                          mb: 3,
                           borderRadius: 2,
                           '& .MuiAlert-icon': {
                             fontSize: '1.5rem',
@@ -338,8 +371,8 @@ const Register = () => {
                     <Fade in={true}>
                       <Alert
                         severity='warning'
-                        sx={{ 
-                          mb: 3, 
+                        sx={{
+                          mb: 3,
                           borderRadius: 2,
                           '& .MuiAlert-icon': {
                             fontSize: '1.5rem',
@@ -372,7 +405,7 @@ const Register = () => {
                       <Box>
                         <Typography
                           variant='h5'
-                          sx={{ 
+                          sx={{
                             fontWeight: 600,
                             color: 'primary.main',
                             mb: 0.5,
@@ -380,20 +413,40 @@ const Register = () => {
                         >
                           {steps[activeStep].label}
                         </Typography>
-                        <Typography variant='body2' color='text.secondary'>
+                        <Typography
+                          variant='body2'
+                          color='text.secondary'
+                        >
                           {steps[activeStep].description}
                         </Typography>
                       </Box>
                     </Box>
-                    <Divider sx={{ background: 'linear-gradient(90deg, #667eea, transparent)' }} />
+                    <Divider
+                      sx={{
+                        background:
+                          'linear-gradient(90deg, #667eea, transparent)',
+                      }}
+                    />
                   </Box>
 
-                  <Box component='form' onSubmit={handleSubmit}>
+                  <Box
+                    component='form'
+                    onSubmit={handleSubmit}
+                  >
                     {/* Step 0: Account Information */}
                     {activeStep === 0 && (
-                      <Fade in={true} timeout={500}>
-                        <Grid container spacing={4}>
-                          <Grid item xs={12}>
+                      <Fade
+                        in={true}
+                        timeout={500}
+                      >
+                        <Grid
+                          container
+                          spacing={4}
+                        >
+                          <Grid
+                            item
+                            xs={12}
+                          >
                             <TextField
                               required
                               fullWidth
@@ -406,8 +459,8 @@ const Register = () => {
                               disabled={loading}
                               InputProps={{
                                 startAdornment: (
-                                  <InputAdornment position="start">
-                                    <Person color="action" />
+                                  <InputAdornment position='start'>
+                                    <Person color='action' />
                                   </InputAdornment>
                                 ),
                               }}
@@ -416,17 +469,22 @@ const Register = () => {
                                   borderRadius: 3,
                                   transition: 'all 0.3s ease',
                                   '&:hover': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.1)',
+                                    boxShadow:
+                                      '0 4px 20px rgba(102, 126, 234, 0.1)',
                                   },
                                   '&.Mui-focused': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
+                                    boxShadow:
+                                      '0 4px 20px rgba(102, 126, 234, 0.2)',
                                   },
                                 },
                               }}
                             />
                           </Grid>
 
-                          <Grid item xs={12}>
+                          <Grid
+                            item
+                            xs={12}
+                          >
                             <TextField
                               required
                               fullWidth
@@ -439,8 +497,8 @@ const Register = () => {
                               disabled={loading}
                               InputProps={{
                                 startAdornment: (
-                                  <InputAdornment position="start">
-                                    <Email color="action" />
+                                  <InputAdornment position='start'>
+                                    <Email color='action' />
                                   </InputAdornment>
                                 ),
                               }}
@@ -449,17 +507,23 @@ const Register = () => {
                                   borderRadius: 3,
                                   transition: 'all 0.3s ease',
                                   '&:hover': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.1)',
+                                    boxShadow:
+                                      '0 4px 20px rgba(102, 126, 234, 0.1)',
                                   },
                                   '&.Mui-focused': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
+                                    boxShadow:
+                                      '0 4px 20px rgba(102, 126, 234, 0.2)',
                                   },
                                 },
                               }}
                             />
                           </Grid>
 
-                          <Grid item xs={12} sm={6}>
+                          <Grid
+                            item
+                            xs={12}
+                            sm={6}
+                          >
                             <TextField
                               required
                               fullWidth
@@ -473,17 +537,23 @@ const Register = () => {
                               disabled={loading}
                               InputProps={{
                                 startAdornment: (
-                                  <InputAdornment position="start">
-                                    <Lock color="action" />
+                                  <InputAdornment position='start'>
+                                    <Lock color='action' />
                                   </InputAdornment>
                                 ),
                                 endAdornment: (
-                                  <InputAdornment position="end">
+                                  <InputAdornment position='end'>
                                     <IconButton
-                                      onClick={() => setShowPassword(!showPassword)}
-                                      edge="end"
+                                      onClick={() =>
+                                        setShowPassword(!showPassword)
+                                      }
+                                      edge='end'
                                     >
-                                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                                      {showPassword ? (
+                                        <VisibilityOff />
+                                      ) : (
+                                        <Visibility />
+                                      )}
                                     </IconButton>
                                   </InputAdornment>
                                 ),
@@ -493,17 +563,23 @@ const Register = () => {
                                   borderRadius: 3,
                                   transition: 'all 0.3s ease',
                                   '&:hover': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.1)',
+                                    boxShadow:
+                                      '0 4px 20px rgba(102, 126, 234, 0.1)',
                                   },
                                   '&.Mui-focused': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
+                                    boxShadow:
+                                      '0 4px 20px rgba(102, 126, 234, 0.2)',
                                   },
                                 },
                               }}
                             />
                           </Grid>
 
-                          <Grid item xs={12} sm={6}>
+                          <Grid
+                            item
+                            xs={12}
+                            sm={6}
+                          >
                             <TextField
                               required
                               fullWidth
@@ -516,17 +592,25 @@ const Register = () => {
                               disabled={loading}
                               InputProps={{
                                 startAdornment: (
-                                  <InputAdornment position="start">
-                                    <Lock color="action" />
+                                  <InputAdornment position='start'>
+                                    <Lock color='action' />
                                   </InputAdornment>
                                 ),
                                 endAdornment: (
-                                  <InputAdornment position="end">
+                                  <InputAdornment position='end'>
                                     <IconButton
-                                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                      edge="end"
+                                      onClick={() =>
+                                        setShowConfirmPassword(
+                                          !showConfirmPassword
+                                        )
+                                      }
+                                      edge='end'
                                     >
-                                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                      {showConfirmPassword ? (
+                                        <VisibilityOff />
+                                      ) : (
+                                        <Visibility />
+                                      )}
                                     </IconButton>
                                   </InputAdornment>
                                 ),
@@ -536,10 +620,12 @@ const Register = () => {
                                   borderRadius: 3,
                                   transition: 'all 0.3s ease',
                                   '&:hover': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.1)',
+                                    boxShadow:
+                                      '0 4px 20px rgba(102, 126, 234, 0.1)',
                                   },
                                   '&.Mui-focused': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
+                                    boxShadow:
+                                      '0 4px 20px rgba(102, 126, 234, 0.2)',
                                   },
                                 },
                               }}
@@ -551,235 +637,288 @@ const Register = () => {
 
                     {/* Step 1: Personal Information */}
                     {activeStep === 1 && (
-                      <Fade in={true} timeout={500}>
+                      <Fade
+                        in={true}
+                        timeout={500}
+                      >
                         <Box>
-                          <Grid container spacing={3}>
-                          <Grid item xs={12} sm={6}>
-                            <TextField
-                              fullWidth
-                              id='firstName'
-                              label='Nombre'
-                              name='profile.firstName'
-                              value={formData.profile.firstName}
-                              onChange={handleChange}
-                              disabled={loading}
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  borderRadius: 3,
-                                  transition: 'all 0.3s ease',
-                                  '&:hover': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.1)',
-                                  },
-                                  '&.Mui-focused': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
-                                  },
-                                },
-                              }}
-                            />
-                          </Grid>
-
-                          <Grid item xs={12} sm={6}>
-                            <TextField
-                              fullWidth
-                              id='lastName'
-                              label='Apellido'
-                              name='profile.lastName'
-                              value={formData.profile.lastName}
-                              onChange={handleChange}
-                              disabled={loading}
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  borderRadius: 3,
-                                  transition: 'all 0.3s ease',
-                                  '&:hover': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.1)',
-                                  },
-                                  '&.Mui-focused': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
-                                  },
-                                },
-                              }}
-                            />
-                          </Grid>
-
-                          <Grid item xs={12} sm={6}>
-                            <TextField
-                              fullWidth
-                              id='age'
-                              label='Edad'
-                              name='profile.age'
-                              type='number'
-                              value={formData.profile.age}
-                              onChange={handleChange}
-                              disabled={loading}
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    <Cake color="action" />
-                                  </InputAdornment>
-                                ),
-                              }}
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  borderRadius: 3,
-                                  transition: 'all 0.3s ease',
-                                  '&:hover': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.1)',
-                                  },
-                                  '&.Mui-focused': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
-                                  },
-                                },
-                              }}
-                            />
-                          </Grid>
-
-                          <Grid item xs={12} sm={6}>
-                            <FormControl 
-                              fullWidth
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  borderRadius: 3,
-                                  transition: 'all 0.3s ease',
-                                  '&:hover': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.1)',
-                                  },
-                                  '&.Mui-focused': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
-                                  },
-                                },
-                              }}
+                          <Grid
+                            container
+                            spacing={3}
+                          >
+                            <Grid
+                              item
+                              xs={12}
+                              sm={6}
                             >
-                              <InputLabel>Género</InputLabel>
-                              <Select
-                                name='profile.gender'
-                                value={formData.profile.gender}
+                              <TextField
+                                fullWidth
+                                id='firstName'
+                                label='Nombre'
+                                name='profile.firstName'
+                                value={formData.profile.firstName}
                                 onChange={handleChange}
                                 disabled={loading}
-                                startAdornment={
-                                  <InputAdornment position="start">
-                                    <Wc color="action" />
-                                  </InputAdornment>
-                                }
-                              >
-                                <MenuItem value='male'>Masculino</MenuItem>
-                                <MenuItem value='female'>Femenino</MenuItem>
-                                <MenuItem value='other'>Otro</MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Grid>
+                                sx={{
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: 3,
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.1)',
+                                    },
+                                    '&.Mui-focused': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.2)',
+                                    },
+                                  },
+                                }}
+                              />
+                            </Grid>
 
-                          <Grid item xs={12} sm={6}>
-                            <TextField
-                              fullWidth
-                              id='height'
-                              label='Altura (cm)'
-                              name='profile.height'
-                              type='number'
-                              value={formData.profile.height}
-                              onChange={handleChange}
-                              disabled={loading}
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    <Height color="action" />
-                                  </InputAdornment>
-                                ),
-                              }}
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  borderRadius: 3,
-                                  transition: 'all 0.3s ease',
-                                  '&:hover': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.1)',
-                                  },
-                                  '&.Mui-focused': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
-                                  },
-                                },
-                              }}
-                            />
-                          </Grid>
-
-                          <Grid item xs={12} sm={6}>
-                            <TextField
-                              fullWidth
-                              id='weight'
-                              label='Peso (kg)'
-                              name='profile.weight'
-                              type='number'
-                              value={formData.profile.weight}
-                              onChange={handleChange}
-                              disabled={loading}
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    <MonitorWeight color="action" />
-                                  </InputAdornment>
-                                ),
-                              }}
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  borderRadius: 3,
-                                  transition: 'all 0.3s ease',
-                                  '&:hover': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.1)',
-                                  },
-                                  '&.Mui-focused': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
-                                  },
-                                },
-                              }}
-                            />
-                          </Grid>
-
-                          <Grid item xs={12}>
-                            <FormControl 
-                              fullWidth
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  borderRadius: 3,
-                                  transition: 'all 0.3s ease',
-                                  '&:hover': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.1)',
-                                  },
-                                  '&.Mui-focused': {
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
-                                  },
-                                },
-                              }}
+                            <Grid
+                              item
+                              xs={12}
+                              sm={6}
                             >
-                              <InputLabel>Nivel de Fitness</InputLabel>
-                              <Select
-                                name='profile.fitnessLevel'
-                                value={formData.profile.fitnessLevel}
+                              <TextField
+                                fullWidth
+                                id='lastName'
+                                label='Apellido'
+                                name='profile.lastName'
+                                value={formData.profile.lastName}
                                 onChange={handleChange}
                                 disabled={loading}
-                                startAdornment={
-                                  <InputAdornment position="start">
-                                    <TrendingUp color="action" />
-                                  </InputAdornment>
-                                }
+                                sx={{
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: 3,
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.1)',
+                                    },
+                                    '&.Mui-focused': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.2)',
+                                    },
+                                  },
+                                }}
+                              />
+                            </Grid>
+
+                            <Grid
+                              item
+                              xs={12}
+                              sm={6}
+                            >
+                              <TextField
+                                fullWidth
+                                id='age'
+                                label='Edad'
+                                name='profile.age'
+                                type='number'
+                                value={formData.profile.age}
+                                onChange={handleChange}
+                                disabled={loading}
+                                InputProps={{
+                                  startAdornment: (
+                                    <InputAdornment position='start'>
+                                      <Cake color='action' />
+                                    </InputAdornment>
+                                  ),
+                                }}
+                                sx={{
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: 3,
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.1)',
+                                    },
+                                    '&.Mui-focused': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.2)',
+                                    },
+                                  },
+                                }}
+                              />
+                            </Grid>
+
+                            <Grid
+                              item
+                              xs={12}
+                              sm={6}
+                            >
+                              <FormControl
+                                fullWidth
+                                sx={{
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: 3,
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.1)',
+                                    },
+                                    '&.Mui-focused': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.2)',
+                                    },
+                                  },
+                                }}
                               >
-                                <MenuItem value='beginner'>🌱 Principiante</MenuItem>
-                                <MenuItem value='intermediate'>💪 Intermedio</MenuItem>
-                                <MenuItem value='advanced'>🏆 Avanzado</MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Grid>
+                                <InputLabel>Género</InputLabel>
+                                <Select
+                                  name='profile.gender'
+                                  value={formData.profile.gender}
+                                  onChange={handleChange}
+                                  disabled={loading}
+                                  startAdornment={
+                                    <InputAdornment position='start'>
+                                      <Wc color='action' />
+                                    </InputAdornment>
+                                  }
+                                >
+                                  <MenuItem value='male'>Masculino</MenuItem>
+                                  <MenuItem value='female'>Femenino</MenuItem>
+                                  <MenuItem value='other'>Otro</MenuItem>
+                                </Select>
+                              </FormControl>
+                            </Grid>
+
+                            <Grid
+                              item
+                              xs={12}
+                              sm={6}
+                            >
+                              <TextField
+                                fullWidth
+                                id='height'
+                                label='Altura (cm)'
+                                name='profile.height'
+                                type='number'
+                                value={formData.profile.height}
+                                onChange={handleChange}
+                                disabled={loading}
+                                InputProps={{
+                                  startAdornment: (
+                                    <InputAdornment position='start'>
+                                      <Height color='action' />
+                                    </InputAdornment>
+                                  ),
+                                }}
+                                sx={{
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: 3,
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.1)',
+                                    },
+                                    '&.Mui-focused': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.2)',
+                                    },
+                                  },
+                                }}
+                              />
+                            </Grid>
+
+                            <Grid
+                              item
+                              xs={12}
+                              sm={6}
+                            >
+                              <TextField
+                                fullWidth
+                                id='weight'
+                                label='Peso (kg)'
+                                name='profile.weight'
+                                type='number'
+                                value={formData.profile.weight}
+                                onChange={handleChange}
+                                disabled={loading}
+                                InputProps={{
+                                  startAdornment: (
+                                    <InputAdornment position='start'>
+                                      <MonitorWeight color='action' />
+                                    </InputAdornment>
+                                  ),
+                                }}
+                                sx={{
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: 3,
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.1)',
+                                    },
+                                    '&.Mui-focused': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.2)',
+                                    },
+                                  },
+                                }}
+                              />
+                            </Grid>
+
+                            <Grid
+                              item
+                              xs={12}
+                            >
+                              <FormControl
+                                fullWidth
+                                sx={{
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: 3,
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.1)',
+                                    },
+                                    '&.Mui-focused': {
+                                      boxShadow:
+                                        '0 4px 20px rgba(102, 126, 234, 0.2)',
+                                    },
+                                  },
+                                }}
+                              >
+                                <InputLabel>Nivel de Fitness</InputLabel>
+                                <Select
+                                  name='profile.fitnessLevel'
+                                  value={formData.profile.fitnessLevel}
+                                  onChange={handleChange}
+                                  disabled={loading}
+                                  startAdornment={
+                                    <InputAdornment position='start'>
+                                      <TrendingUp color='action' />
+                                    </InputAdornment>
+                                  }
+                                >
+                                  <MenuItem value='beginner'>
+                                    🌱 Principiante
+                                  </MenuItem>
+                                  <MenuItem value='intermediate'>
+                                    💪 Intermedio
+                                  </MenuItem>
+                                  <MenuItem value='advanced'>
+                                    🏆 Avanzado
+                                  </MenuItem>
+                                </Select>
+                              </FormControl>
+                            </Grid>
                           </Grid>
                         </Box>
                       </Fade>
                     )}
+                  </Box>
                 </Box>
-              </Box>
 
                 {/* Navigation Buttons */}
-                <Box 
-                  sx={{ 
-                    p: 4, 
+                <Box
+                  sx={{
+                    p: 4,
                     pt: 0,
-                    display: 'flex', 
+                    display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     borderTop: '1px solid #e0e0e0',
@@ -789,8 +928,8 @@ const Register = () => {
                   <Button
                     disabled={activeStep === 0}
                     onClick={handleBack}
-                    variant="outlined"
-                    size="large"
+                    variant='outlined'
+                    size='large'
                     sx={{ px: 4 }}
                   >
                     Anterior
@@ -804,7 +943,14 @@ const Register = () => {
                         size='large'
                         disabled={loading}
                         startIcon={
-                          loading ? <CircularProgress size={20} color="inherit" /> : <PersonAdd />
+                          loading ? (
+                            <CircularProgress
+                              size={20}
+                              color='inherit'
+                            />
+                          ) : (
+                            <PersonAdd />
+                          )
                         }
                         sx={{
                           px: 4,
@@ -812,13 +958,15 @@ const Register = () => {
                           borderRadius: 3,
                           fontSize: '1.1rem',
                           fontWeight: 600,
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          background:
+                            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                           boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
                           transition: 'all 0.3s ease',
                           '&:hover': {
                             transform: 'translateY(-2px)',
                             boxShadow: '0 12px 40px rgba(102, 126, 234, 0.4)',
-                            background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                            background:
+                              'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
                           },
                           '&:active': {
                             transform: 'translateY(0px)',
@@ -837,7 +985,7 @@ const Register = () => {
                         variant='contained'
                         onClick={handleNext}
                         disabled={!validateStep(activeStep)}
-                        size="large"
+                        size='large'
                         sx={{ px: 4 }}
                       >
                         Siguiente
@@ -872,11 +1020,14 @@ const Register = () => {
             </Slide>
 
             {/* Footer */}
-            <Fade in={true} timeout={1200}>
+            <Fade
+              in={true}
+              timeout={1200}
+            >
               <Box sx={{ mt: 4, textAlign: 'center' }}>
                 <Typography
                   variant='body2'
-                  sx={{ 
+                  sx={{
                     color: 'rgba(255, 255, 255, 0.8)',
                     fontWeight: 400,
                   }}

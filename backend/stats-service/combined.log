@@ -1,0 +1,7 @@
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:31:53 +0000] \"GET /health HTTP/1.1\" 200 41 \"-\" \"-\"","timestamp":"2025-08-05T06:31:53.845Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-08-05T06:31:53.866Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:31:54 +0000] \"GET /metrics HTTP/1.1\" 200 - \"-\" \"-\"","timestamp":"2025-08-05T06:31:54.003Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:31:54 +0000] \"GET /body-metrics HTTP/1.1\" 401 33 \"-\" \"-\"","timestamp":"2025-08-05T06:31:54.070Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:31:54 +0000] \"POST /body-metrics HTTP/1.1\" 401 33 \"-\" \"-\"","timestamp":"2025-08-05T06:31:54.315Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:31:54 +0000] \"GET /dashboard HTTP/1.1\" 401 33 \"-\" \"-\"","timestamp":"2025-08-05T06:31:54.337Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [05/Aug/2025:06:31:54 +0000] \"POST /body-metrics HTTP/1.1\" 403 25 \"-\" \"-\"","timestamp":"2025-08-05T06:31:54.365Z"}
